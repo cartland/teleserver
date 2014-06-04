@@ -1,13 +1,11 @@
-package main
+package teleserver
 
 import (
 	"encoding/json"
 	"math"
-	"net/http"
 	"time"
 
 	"code.google.com/p/go.net/websocket"
-	"github.com/gorilla/mux"
 )
 
 var startTime = time.Now()
@@ -33,8 +31,7 @@ func getSolar() Metric {
 	return Metric{Type: "solar", Value: 1000 + 200*math.Sin(t.Seconds())}
 }
 
-// Echo the data received on the WebSocket.
-func EchoServer(ws *websocket.Conn) {
+func MetricsServer(ws *websocket.Conn) {
 	e := json.NewEncoder(ws)
 	for {
 		e.Encode(getSpeed())
@@ -42,11 +39,4 @@ func EchoServer(ws *websocket.Conn) {
 		e.Encode(getSolar())
 		time.Sleep(100 * time.Millisecond)
 	}
-}
-
-func main() {
-	r := mux.NewRouter()
-	r.Handle("/ws", websocket.Handler(EchoServer))
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public")))
-	http.ListenAndServe(":8080", r)
 }

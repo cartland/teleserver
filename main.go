@@ -1,42 +1,42 @@
 package main
 
 import (
-	"fmt"
-	"io"
+	"encoding/json"
+	"math"
 	"net/http"
+	"time"
 
 	"code.google.com/p/go.net/websocket"
 	"github.com/gorilla/mux"
 )
 
-// Echo the data received on the WebSocket.
-func EchoServer(ws *websocket.Conn) { io.Copy(ws, ws) }
+var startTime = time.Now()
 
-func HelloWorld(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, webpage)
+type Metric struct {
+	Type  string  `json:"type"`
+	Value float64 `json:"value"`
+}
+
+func getSpeed() Metric {
+	t := time.Since(startTime)
+	return Metric{
+		Type:  "speed",
+		Value: 20 + 2*math.Cos(t.Seconds()),
+	}
+}
+
+// Echo the data received on the WebSocket.
+func EchoServer(ws *websocket.Conn) {
+	e := json.NewEncoder(ws)
+	for {
+		e.Encode(getSpeed())
+		time.Sleep(250 * time.Millisecond)
+	}
 }
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", HelloWorld)
 	r.Handle("/ws", websocket.Handler(EchoServer))
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public")))
 	http.ListenAndServe(":8080", r)
 }
-
-const webpage = `
-<!DOCTYPE html>
-<html>
-<body>
-There's a script here, trust me!
-<script>
-var ws = new WebSocket("ws://" + window.location.host + "/ws");
-ws.onopen = function (e) {
-  ws.send("Here's some text that the server is urgently awaiting!");
-};
-ws.onmessage = function (e) {
-  console.log(e.data);
-}
-</script>
-</body>
-</html>
-`

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+body {
+  background: black;
+  color: white;
+}
+</style>
+<body>
+<span id="speed">Speed goes here</span>
+<script>
+var ws = new WebSocket("ws://" + window.location.host + "/ws");
+ws.onopen = function (e) {
+  ws.send("Here's some text that the server is urgently awaiting!");
+};
+ws.onmessage = function (e) {
+  console.log(e.data)
+  var data = JSON.parse(e.data)
+  if (data.type == "speed") {
+    document.getElementById("speed").innerText = data.value
+  }
+}
+</script>
+</body>
+</html>

@@ -22,8 +22,7 @@ func getSpeed() Metric {
 
 func getVolt() Metric {
 	t := time.Since(startTime)
-	return Metric{
-		Type: "voltage", Value: 120 + 20*math.Sin(t.Seconds())}
+	return Metric{Type: "voltage", Value: 120 + 20*math.Sin(t.Seconds())}
 }
 
 func getSolar() Metric {

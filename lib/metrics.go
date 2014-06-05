@@ -1,11 +1,13 @@
-package teleserver
+package lib
 
 import (
-	"encoding/json"
 	"math"
 	"time"
+)
 
-	"code.google.com/p/go.net/websocket"
+const (
+	// Time between fake data readings
+	metricPeriod = 500 * time.Millisecond
 )
 
 var startTime = time.Now()
@@ -30,12 +32,11 @@ func getSolar() Metric {
 	return Metric{Type: "solar", Value: 1000 + 200*math.Sin(t.Seconds())}
 }
 
-func MetricsServer(ws *websocket.Conn) {
-	e := json.NewEncoder(ws)
+func GenFake(b *Broadcaster) {
 	for {
-		e.Encode(getSpeed())
-		e.Encode(getVolt())
-		e.Encode(getSolar())
-		time.Sleep(100 * time.Millisecond)
+		b.Cast(getSpeed())
+		b.Cast(getVolt())
+		b.Cast(getSolar())
+		time.Sleep(metricPeriod)
 	}
 }

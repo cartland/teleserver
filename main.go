@@ -7,16 +7,19 @@ import (
 
 	"bitbucket.org/stvnrhodes/teleserver/lib"
 
-	"code.google.com/p/go.net/websocket"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 )
 
 func main() {
 	port := flag.Int("port", 8080, "Port for the webserver")
 	flag.Parse()
 
+	b := lib.NewBroadcaster()
+	go lib.GenFake(b)
+
 	r := mux.NewRouter()
-	r.Handle("/ws", websocket.Handler(teleserver.MetricsServer))
+	r.HandleFunc("/ws", lib.ServeWs(b, &websocket.Upgrader{}))
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public")))
 	http.ListenAndServe(fmt.Sprintf(":%d", *port), r)
 }

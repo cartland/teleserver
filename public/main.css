@@ -2,7 +2,6 @@ body {
   background: black;
   color: white;
 }
-
 .container {
   text-align: center;
   margin: auto;
@@ -21,4 +20,21 @@ body {
   height: 100px;
   margin: 1em;
   text-align: center;
+}
+
+@media screen and (min-width: 0px) and (max-width: 849px) {
+  .plot-placeholder {
+    height: 200px;
+  }
+}
+
+@media screen and (min-width: 850px) {
+  .plot-placeholder {
+    width: 850px;
+    height: 450px;
+  }
+}
+
+.plot-placeholder {
+  margin: auto;
 }

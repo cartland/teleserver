@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"bitbucket.org/stvnrhodes/teleserver/lib"
+	"github.com/calsol/teleserver/lib"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/stvnrhodes/broadcaster"

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/stvnrhodes/teleserver/lib"
+	"github.com/calsol/teleserver/lib"
 	"github.com/gorilla/mux"
 	"github.com/stvnrhodes/broadcaster"
 )

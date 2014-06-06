@@ -70,7 +70,11 @@ func Read(r io.Reader, b broadcaster.Caster) {
 	for {
 		m := &Metric{}
 		if err := d.Decode(m); err != nil {
-			log.Fatal("issues reading serial: ", err)
+			if err == io.EOF {
+				log.Print("Found EOF, stopping the read")
+				return
+			}
+			log.Fatal("issues reading from reader: ", err)
 		}
 		m.Time = ms()
 		b.Cast(m)
@@ -102,16 +106,16 @@ type GraphData struct {
 	Data  []point `json:"data"`
 }
 
-func fromMS(milliseconds int64) time.Time {
+func FromMS(milliseconds int64) time.Time {
 	return time.Unix(0, 1000000*milliseconds)
 }
 
 // updateSeries adds p to ps and removes any points from longer ago than oldest.
 func updateSeries(ps []point, p point, oldest time.Duration) []point {
-	now, then := fromMS(p.x), fromMS(ps[0].x)
+	now, then := FromMS(p.x), FromMS(ps[0].x)
 	for len(ps) > 10 && now.Sub(then) > oldest {
 		ps = ps[1:]
-		then = fromMS(ps[0].x)
+		then = FromMS(ps[0].x)
 	}
 	return append(ps, p)
 }

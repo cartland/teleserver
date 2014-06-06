@@ -4,7 +4,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"bitbucket.org/stvnrhodes/teleserver/lib"
 	"github.com/gorilla/mux"
@@ -26,6 +28,7 @@ func getHTTP(t *testing.T, url string) string {
 
 func TestServeJSON(t *testing.T) {
 	b := broadcaster.New()
+	defer b.Close()
 	r := mux.NewRouter()
 	r.HandleFunc("/{name}.json", lib.ServeJSON(b))
 	ts := httptest.NewServer(r)
@@ -48,6 +51,36 @@ func TestServeJSON(t *testing.T) {
 		got := getHTTP(t, ts.URL+c.path)
 		if got != c.want {
 			t.Errorf("%v: got %v, want %v", c.path, got, c.want)
+		}
+	}
+}
+
+func TestReadData(t *testing.T) {
+	testString := `:3.0}
+{"type":"foo","value":1.0}
+{"type":"bar","value":2.0}
+`
+	then := time.Now()
+	time.Sleep(time.Millisecond)
+	b := broadcaster.New()
+	defer b.Close()
+	go lib.Read(strings.NewReader(testString), b)
+
+	expected := []*lib.Metric{{Type: "foo", Value: 1.0}, {Type: "bar", Value: 2.0}}
+	ch := b.Subscribe(nil)
+	for _, e := range expected {
+		got := <-ch
+		m, ok := got.(*lib.Metric)
+		if !ok {
+			t.Errorf("Wrong type %[1]T for %+[1]v", got)
+			continue
+		}
+		now := time.Now()
+		if m.Type != e.Type || m.Value != e.Value {
+			t.Errorf("Wrong metric: got %+v, want %+v", m, e)
+		}
+		if time := lib.FromMS(m.Time); time.Before(then) || time.After(now) {
+			t.Errorf("Time %v should be between 0 and %v", time.Sub(then), now.Sub(then))
 		}
 	}
 }

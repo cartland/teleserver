@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/stvnrhodes/broadcaster"
 )
 
 const (
@@ -15,12 +16,12 @@ const (
 	writeWait = time.Second
 )
 
-func writer(ws *websocket.Conn, metricCh <-chan Metric) {
+func writer(ws *websocket.Conn, ch <-chan interface{}) {
 	pingTicker := time.NewTicker(pingPeriod)
 	defer pingTicker.Stop()
 	for {
 		select {
-		case m := <-metricCh:
+		case m := <-ch:
 			ws.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := ws.WriteJSON(m); err != nil {
 				log.Println("Disconnected from client: ", err)
@@ -36,7 +37,7 @@ func writer(ws *websocket.Conn, metricCh <-chan Metric) {
 	}
 }
 
-func ServeWs(b *Broadcaster, u *websocket.Upgrader) func(http.ResponseWriter, *http.Request) {
+func ServeWs(b broadcaster.Caster, u *websocket.Upgrader) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ws, err := u.Upgrade(w, r, nil)
 		if err != nil {

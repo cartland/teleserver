@@ -3,6 +3,8 @@ package lib
 import (
 	"math"
 	"time"
+
+	"github.com/stvnrhodes/broadcaster"
 )
 
 const (
@@ -32,7 +34,7 @@ func getSolar() Metric {
 	return Metric{Type: "solar", Value: 1000 + 200*math.Sin(t.Seconds())}
 }
 
-func GenFake(b *Broadcaster) {
+func GenFake(b broadcaster.Caster) {
 	for {
 		b.Cast(getSpeed())
 		b.Cast(getVolt())

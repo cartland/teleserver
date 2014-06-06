@@ -9,13 +9,14 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/stvnrhodes/broadcaster"
 )
 
 func main() {
 	port := flag.Int("port", 8080, "Port for the webserver")
 	flag.Parse()
 
-	b := lib.NewBroadcaster()
+	b := broadcaster.New()
 	go lib.GenFake(b)
 
 	r := mux.NewRouter()

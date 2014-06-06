@@ -19,11 +19,14 @@ const (
 	metricPeriod = 200 * time.Millisecond
 
 	// How long to look back for json data
+	// This constant should be kept in sync with public/main.js
 	bufferedTime = 20 * time.Second
 )
 
 var startTime = time.Now()
 
+// Metric represents a json object with the type of metric, the value of the
+// metric, and the timestamp in milliseconds since epoch.
 type Metric struct {
 	Type  string  `json:"type"`
 	Value float64 `json:"value"`
@@ -52,6 +55,8 @@ func getSolar() Metric {
 	return Metric{Type: "solar", Value: 1000 + 200*math.Cos(t.Seconds()), Time: ms()}
 }
 
+// Read will continually read json from the io.Reader, interpret it as a metric,
+// and send the metric through the broadcaster.
 func Read(r io.Reader, b broadcaster.Caster) {
 	// Read until new line in case we start in the middle
 	p := make([]byte, 1)
@@ -72,6 +77,7 @@ func Read(r io.Reader, b broadcaster.Caster) {
 	}
 }
 
+// GenFake broadcasts fake data for speed, voltage, and power.
 func GenFake(b broadcaster.Caster) {
 	for {
 		b.Cast(getSpeed())
@@ -90,6 +96,7 @@ func (p point) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("[%d,%f]", p.x, p.y)), nil
 }
 
+// GraphData represents the data for a flot graph.
 type GraphData struct {
 	Label string  `json:"label"`
 	Data  []point `json:"data"`
@@ -109,13 +116,17 @@ func updateSeries(ps []point, p point, oldest time.Duration) []point {
 	return append(ps, p)
 }
 
-// ServeJSON remembers broadcast metrics for the 5 minutes and serves them up
-// when requested based on the type field.
+// ServeJSON remembers broadcast metrics for bufferedTime and serves them up
+// when requested based on the type field. It uses the {name} variable from
+// mux.Vars to determine which data to serve, and will serve all graphs in an
+// array if {name} == "all".
 func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 	var mu sync.Mutex
 	data := make(map[string]GraphData)
 	dataCh := b.Subscribe(nil)
+
 	go func() {
+		// Get broadcast data and process it into a map for requests
 		for d := range dataCh {
 			switch d := d.(type) {
 			case Metric:
@@ -134,11 +145,24 @@ func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 			}
 		}
 	}()
+
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		name := mux.Vars(r)["name"]
 		e := json.NewEncoder(w)
+		var d interface{}
 		mu.Lock()
-		d := data[name]
+		// Special case "all" to return all the data.
+		if name == "all" {
+			var s []GraphData
+			for _, g := range data {
+				s = append(s, g)
+			}
+			d = s
+		} else {
+			// A nonexistant name will return an empty struct/
+			d = data[name]
+		}
 		mu.Unlock()
 		if err := e.Encode(d); err != nil {
 			log.Print("Failed to send json: ", err)

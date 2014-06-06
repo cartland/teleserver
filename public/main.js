@@ -1,4 +1,7 @@
 (function($) {
+    // How long to have graph data
+    // This constant should be kept in sync with metrics.go
+    var bufferedTime = 20 * 1000 // 20s * 1000 ms/s
 
     // Create the graph
     var plot = $.plot("#placeholder", [], {
@@ -15,22 +18,29 @@
         }
     });
     var data = {}, fetched = {};
+    var dataArray = [];
 
+    function refreshPlot() {
+        plot.setData(dataArray);
+        plot.setupGrid();
+        plot.draw();
+    }
     // Populate the graph with initial data
-    function onJSONFetch(series) {
-        if (!fetched[series.label]) {
-            fetched[series.label] = true;
-            data[series.label] = series;
-            console.log(series)
-            plot.setData([series]);
-            plot.setupGrid();
-            plot.draw();
+    function onJSONFetch(allSeries) {
+        for (var i = 0; i < allSeries.length; i++) {
+            series = allSeries[i]
+            if (!fetched[series.label]) {
+                fetched[series.label] = true;
+                data[series.label] = series;
+            }
         }
+        dataArray = allSeries
+        refreshPlot()
     }
 
     // Fetch the initial data
     $.ajax({
-        url: "/data/speed.json",
+        url: "/data/all.json",
         type: "GET",
         dataType: "json",
         success: onJSONFetch
@@ -43,12 +53,12 @@
             if (fetched[name]) {
                 series = data[name].data;
                 series.push(point);
-                series.shift();
+                while (series.length > 1 && point[0] - series[0][0] > bufferedTime) {
+                    series.shift();
+                }
 
-                // TODO(stvn): Support multiple graphs and base stuff on time
-                plot.setData([data[name]]);
-                plot.setupGrid();
-                plot.draw();
+                // TODO(stvn): Support multiple graphs
+                refreshPlot()
             }
         }
 

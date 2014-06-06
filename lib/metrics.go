@@ -1,6 +1,9 @@
 package lib
 
 import (
+	"encoding/json"
+	"io"
+	"log"
 	"math"
 	"time"
 
@@ -34,9 +37,20 @@ func getSolar() Metric {
 	return Metric{Type: "solar", Value: 1000 + 200*math.Sin(t.Seconds())}
 }
 
+func Read(r io.Reader, b broadcaster.Caster) {
+	d := json.NewDecoder(r)
+	for {
+		m := &Metric{}
+		if err := d.Decode(m); err != nil {
+			log.Print("issues reading serial: ", err)
+		}
+		b.Cast(m)
+	}
+}
+
 func GenFake(b broadcaster.Caster) {
 	for {
-		b.Cast(getSpeed())
+		// b.Cast(getSpeed())
 		b.Cast(getVolt())
 		b.Cast(getSolar())
 		time.Sleep(metricPeriod)

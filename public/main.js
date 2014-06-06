@@ -1,7 +1,7 @@
-$(function() {
-    var data = [],
-        maxPoints = 300;
-    var plot = $.plot("#speed-plot", [data], {
+(function($) {
+
+    // Create the graph
+    var plot = $.plot("#placeholder", [], {
         legend: {
             show: true
         },
@@ -14,28 +14,52 @@ $(function() {
             timezone: "browser"
         }
     });
+    var data = {}, fetched = {};
 
-    function update(point) {
-        data.push([Date.now(), point])
-        while (data.length > maxPoints) {
-            data.shift()
+    // Populate the graph with initial data
+    function onJSONFetch(series) {
+        if (!fetched[series.label]) {
+            fetched[series.label] = true;
+            data[series.label] = series;
+            console.log(series)
+            plot.setData([series]);
+            plot.setupGrid();
+            plot.draw();
         }
-        plot.setData([{
-            label: "Speed",
-            data: data
-        }]);
-        plot.setupGrid()
-        plot.draw();
     }
 
-    var ws = new WebSocket("ws://" + window.location.host + "/ws");
-    ws.onmessage = function(e) {
-        var data = JSON.parse(e.data)
-        if (data.type) {
-            $("#" + data.type).text(data.value.toFixed(1))
+    // Fetch the initial data
+    $.ajax({
+        url: "/data/speed.json",
+        type: "GET",
+        dataType: "json",
+        success: onJSONFetch
+    });
+
+    $(function() {
+
+        // Update the graph with the given point
+        function update(name, point) {
+            if (fetched[name]) {
+                series = data[name].data;
+                series.push(point);
+                series.shift();
+
+                // TODO(stvn): Support multiple graphs and base stuff on time
+                plot.setData([data[name]]);
+                plot.setupGrid();
+                plot.draw();
+            }
         }
-        if (data.type === "speed") {
-            update(data.value)
+
+        // Create a websocket connection and do live updates of the data
+        var ws = new WebSocket("ws://" + window.location.host + "/ws");
+        ws.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            if (data.type) {
+                $("#" + data.type).text(data.value.toFixed(1));
+                update(data.type, [data.time, data.value]);
+            }
         }
-    }
-});
+    });
+})(jQuery);

@@ -37,7 +37,7 @@ func writer(ws *websocket.Conn, ch <-chan interface{}) {
 	}
 }
 
-func ServeWs(b broadcaster.Caster, u *websocket.Upgrader) func(http.ResponseWriter, *http.Request) {
+func ServeWS(b broadcaster.Caster, u *websocket.Upgrader) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ws, err := u.Upgrade(w, r, nil)
 		if err != nil {

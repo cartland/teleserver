@@ -39,7 +39,8 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/ws", lib.ServeWs(b, &websocket.Upgrader{}))
+	r.HandleFunc("/ws", lib.ServeWS(b, &websocket.Upgrader{}))
+	r.HandleFunc("/data/{name}.json", lib.ServeJSON(b))
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public")))
 	http.ListenAndServe(fmt.Sprintf(":%d", *port), r)
 }

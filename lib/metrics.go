@@ -22,11 +22,6 @@ type Metric struct {
 	Value float64 `json:"value"`
 }
 
-func getSpeed() Metric {
-	t := time.Since(startTime)
-	return Metric{Type: "speed", Value: 20 + 2*math.Cos(t.Seconds())}
-}
-
 func getVolt() Metric {
 	t := time.Since(startTime)
 	return Metric{Type: "voltage", Value: 120 + 20*math.Sin(t.Seconds())}
@@ -34,15 +29,23 @@ func getVolt() Metric {
 
 func getSolar() Metric {
 	t := time.Since(startTime)
-	return Metric{Type: "solar", Value: 1000 + 200*math.Sin(t.Seconds())}
+	return Metric{Type: "solar", Value: 1000 + 200*math.Cos(t.Seconds())}
 }
 
 func Read(r io.Reader, b broadcaster.Caster) {
+	// Read until new line in case we start in the middle
+	p := make([]byte, 1)
+	for _, err := r.Read(p); p[0] != '\n'; _, err = r.Read(p) {
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	d := json.NewDecoder(r)
 	for {
 		m := &Metric{}
 		if err := d.Decode(m); err != nil {
-			log.Print("issues reading serial: ", err)
+			log.Fatal("issues reading serial: ", err)
 		}
 		b.Cast(m)
 	}
@@ -50,7 +53,6 @@ func Read(r io.Reader, b broadcaster.Caster) {
 
 func GenFake(b broadcaster.Caster) {
 	for {
-		// b.Cast(getSpeed())
 		b.Cast(getVolt())
 		b.Cast(getSolar())
 		time.Sleep(metricPeriod)

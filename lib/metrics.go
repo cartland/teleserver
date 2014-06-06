@@ -160,10 +160,16 @@ func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 			}
 			d = s
 		} else {
-			// A nonexistant name will return an empty struct.
-			d = data[name]
+			// A nonexistant name should 404.
+			if s, ok := data[name]; ok {
+				d = s
+			}
 		}
 		mu.Unlock()
+		if d == nil {
+			w.WriteHeader(http.StatusNotFound)
+			d = GraphData{Label: name}
+		}
 		if err := e.Encode(d); err != nil {
 			log.Print("Failed to send json: ", err)
 		}

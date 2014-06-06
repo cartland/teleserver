@@ -16,4 +16,4 @@ tablet. This is a proof of concept, and currently generates fake data.
 * `-baud`: Baud rate for the serial port. Default is 115200.
 * `-fake`: Ignore serial port, serve fake data.
 * `-log_file`: Log to a file with this prefix. A suffix of
-  "_YYYY-MM-DD_HH:MM:SS" is added as a suffix. Default prefix is "_tmp"
+  "_YYYY-MM-DD_HH:MM:SS" is added as a suffix. Default prefix is "_tmp".

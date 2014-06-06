@@ -13,5 +13,6 @@ tablet. This is a proof of concept, and currently generates fake data.
 ###Flags
 * `-port`: Port for the webserver. Default is 8080.
 * `-serial`: Port for the serial uart connection. Will error if not provided.
-* `-baud`: Baud rate for the serial port. Default is 115200
+* `-baud`: Baud rate for the serial port. Default is 115200.
 * `-fake`: Ignore serial port, serve fake data.
+* `-log_file`: Not yet implemented.

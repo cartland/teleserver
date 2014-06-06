@@ -126,7 +126,7 @@ func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 	dataCh := b.Subscribe(nil)
 
 	go func() {
-		// Get broadcast data and process it into a map for requests
+		// Get broadcast data and process it into a map for requests.
 		for d := range dataCh {
 			switch d := d.(type) {
 			case Metric:
@@ -160,7 +160,7 @@ func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 			}
 			d = s
 		} else {
-			// A nonexistant name will return an empty struct/
+			// A nonexistant name will return an empty struct.
 			d = data[name]
 		}
 		mu.Unlock()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"bitbucket.org/stvnrhodes/teleserver/lib"
 	"github.com/gorilla/mux"
@@ -18,9 +19,18 @@ func main() {
 	uart := flag.String("serial", "", "Serial port for talking to the car")
 	baud := flag.Int("baud", 115200, "Baud rate for the serial port")
 	fake := flag.Bool("fake", false, "Generate fake data and ignore serial")
+	file := flag.String("log_file", "", "If provided, create a log file and write logs to it")
 	flag.Parse()
 
 	b := broadcaster.New()
+	if *file != "" {
+		f, err := os.OpenFile(*file, os.O_CREATE|os.O_APPEND, os.ModeAppend|0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_ = f
+		log.Fatal("Logging is not implemented yet :-(")
+	}
 
 	if *fake {
 		go lib.GenFake(b)

@@ -64,10 +64,11 @@ func TestReadData(t *testing.T) {
 	time.Sleep(time.Millisecond)
 	b := broadcaster.New()
 	defer b.Close()
-	go lib.Read(strings.NewReader(testString), b)
+	ch := b.Subscribe(nil)
+
+	lib.Read(strings.NewReader(testString), b)
 
 	expected := []*lib.Metric{{Type: "foo", Value: 1.0}, {Type: "bar", Value: 2.0}}
-	ch := b.Subscribe(nil)
 	for _, e := range expected {
 		got := <-ch
 		m, ok := got.(*lib.Metric)

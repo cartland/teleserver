@@ -6,8 +6,11 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"log"
+	"time"
 
 	"github.com/calsol/teleserver/messages"
+	"github.com/stvnrhodes/broadcaster"
 )
 
 const (
@@ -100,4 +103,18 @@ func (c *CANReader) Read() (messages.CAN, error) {
 		return newCANFromBytes(c.b.Bytes())
 	}
 	return nil, c.b.Err()
+}
+
+// ReadCAN will continually read bytes from the io.Reader, interpret them as
+// binary CAN messages, and send them through the broadcaster.
+func ReadCAN(r io.Reader, b broadcaster.Caster) {
+	c := NewCANReader(r)
+	for {
+		msg, err := c.Read()
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		b.Cast(messages.CANPlus{msg, time.Now()})
+	}
 }

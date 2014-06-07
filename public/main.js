@@ -66,12 +66,22 @@
         var ws = new WebSocket("ws://" + window.location.host + "/ws");
         ws.onmessage = function(e) {
             var data = JSON.parse(e.data);
+
             if (data.time) {
-                data.time = (new Date(data.time)).getTime()
+                data.time = (new Date(data.time)).getTime();
             }
             if (data.type) {
                 $("#" + data.type).text(data.value.toFixed(1));
                 update(data.type, [data.time, data.value]);
+            }
+            if (data.CAN) {
+                for (var key in data.CAN) {
+                    if (data.CAN.hasOwnProperty(key)) {
+                        var val = data.CAN[key]
+                        $("#" + key).text(val.toFixed(1));
+                        update(key, [data.time, val]);
+                    }
+                }
             }
         }
     });

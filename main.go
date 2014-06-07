@@ -17,6 +17,7 @@ func main() {
 	port := flag.Int("port", 8080, "Port for the webserver")
 	uart := flag.String("serial", "", "Serial port for talking to the car")
 	baud := flag.Int("baud", 115200, "Baud rate for the serial port")
+	can := flag.Bool("can", false, "Treat the serial as streaming CAN, not JSON.")
 	fake := flag.Bool("fake", false, "Generate fake data and ignore serial")
 	file := flag.String("log_file", "_tmp", "Prefix for the log file. The log file name is based on the time")
 	flag.Parse()
@@ -37,7 +38,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		go lib.Read(p, b)
+		if *can {
+			go lib.ReadCAN(p, b)
+		} else {
+			go lib.ReadJSON(p, b)
+		}
 	}
 
 	r := mux.NewRouter()

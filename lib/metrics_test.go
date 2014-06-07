@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/calsol/teleserver/lib"
+	"github.com/calsol/teleserver/messages"
 	"github.com/gorilla/mux"
 	"github.com/stvnrhodes/broadcaster"
 )
@@ -52,6 +53,13 @@ func TestServeJSON(t *testing.T) {
 		if got != c.want {
 			t.Errorf("%v: got %v, want %v", c.path, got, c.want)
 		}
+	}
+}
+
+func TestServeCANJSON(t *testing.T) {
+	messages.CANPlus{
+		&messages.VelocityMeasurement{MotorVelocity: spd, VehicleVelocity: 4 * spd},
+		time.Now(),
 	}
 }
 

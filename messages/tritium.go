@@ -26,9 +26,9 @@ func twoFloats(b []byte) (float32, float32, error) {
 // placing the system into neutral.
 type MotorDriveCommand struct {
 	// Desired motor current set point as a percentage of maximum current setting.
-	MotorCurrent float32 `json:"Motor Current"`
+	MotorCurrent float32
 	// Desired motor velocity set point in metres/second
-	MotorVelocity float32 `json:"Motor Velocity"`
+	MotorVelocity float32
 }
 
 func (MotorDriveCommand) New() CAN { return &MotorDriveCommand{} }
@@ -41,7 +41,7 @@ func (m *MotorDriveCommand) UnmarshalBinary(b []byte) error {
 type MotorPowerCommand struct {
 	// Desired set point of current drawn from the bus by the controller as a
 	// percentage of absolute bus current limit.
-	BusCurrent float32 `json:"Bus Current"`
+	BusCurrent float32
 }
 
 func (MotorPowerCommand) New() CAN { return &MotorPowerCommand{} }
@@ -53,9 +53,9 @@ func (m *MotorPowerCommand) UnmarshalBinary(b []byte) error {
 
 type BusMeasurement struct {
 	// DC Bus voltage at the controller.
-	BusVoltage float32 `json:"Bus Voltage`
+	BusVoltage float32
 	// Current drawn from the DC bus by the controller.
-	BusCurrent float32 `json:"Bus Current"`
+	BusCurrent float32
 }
 
 func (BusMeasurement) New() CAN { return &BusMeasurement{} }
@@ -67,9 +67,9 @@ func (m *BusMeasurement) UnmarshalBinary(b []byte) error {
 
 type VelocityMeasurement struct {
 	// Motor angular frequency in revolutions per minute.
-	MotorVelocity float32 `json:"Motor Velocity"`
+	MotorVelocity float32
 	// Vehicle velocity in metres / second.
-	VehicleVelocity float32 `json:"Vehicle Velocity"`
+	VehicleVelocity float32
 }
 
 func (VelocityMeasurement) New() CAN { return &VelocityMeasurement{} }

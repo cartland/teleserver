@@ -7,9 +7,11 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"reflect"
 	"sync"
 	"time"
 
+	"github.com/calsol/teleserver/messages"
 	"github.com/gorilla/mux"
 	"github.com/stvnrhodes/broadcaster"
 )
@@ -35,17 +37,17 @@ type Metric struct {
 
 func getSpeed() *Metric {
 	t := time.Since(startTime)
-	return &Metric{Type: "speed", Value: 50 + 10*math.Sin(t.Seconds()), Time: time.Now()}
+	return &Metric{Type: "speed", Value: 50 + 20*math.Cos(t.Seconds()), Time: time.Now()}
 }
 
-func getVolt() *Metric {
+func getPower() messages.CANPlus {
 	t := time.Since(startTime)
-	return &Metric{Type: "voltage", Value: 120 + 20*math.Cos(t.Seconds()), Time: time.Now()}
-}
-
-func getSolar() *Metric {
-	t := time.Since(startTime)
-	return &Metric{Type: "solar", Value: 1000 + 200*math.Cos(t.Seconds()), Time: time.Now()}
+	v := float32(100 + 10*math.Sin(t.Seconds()))
+	a := v/4 + float32(10*math.Sin(t.Seconds()/1.8))
+	return messages.CANPlus{
+		&messages.BusMeasurement{BusVoltage: v, BusCurrent: a},
+		time.Now(),
+	}
 }
 
 // readTill takes bytes from the reader until it sees b.
@@ -58,9 +60,9 @@ func readTill(r io.Reader, b byte) {
 	}
 }
 
-// Read will continually read json from the io.Reader, interpret it as a metric,
-// and send the metric through the broadcaster.
-func Read(r io.Reader, b broadcaster.Caster) {
+// ReadJSON will continually read json from the io.Reader, interpret it as a
+// metric, and send the metric through the broadcaster.
+func ReadJSON(r io.Reader, b broadcaster.Caster) {
 	readTill(r, '\n')
 
 	d := json.NewDecoder(r)
@@ -82,8 +84,7 @@ func Read(r io.Reader, b broadcaster.Caster) {
 func GenFake(b broadcaster.Caster) {
 	for {
 		b.Cast(getSpeed())
-		b.Cast(getVolt())
-		b.Cast(getSolar())
+		b.Cast(getPower())
 		time.Sleep(metricPeriod)
 	}
 }
@@ -113,6 +114,20 @@ func updateSeries(ps []point, p point, oldest time.Duration) []point {
 	return append(ps, p)
 }
 
+func updateData(data map[string]GraphData, mu *sync.Mutex, name string, p point) {
+	mu.Lock()
+	defer mu.Unlock()
+	if series, ok := data[name]; ok {
+		series.Data = updateSeries(series.Data, p, bufferedTime)
+		data[name] = series
+	} else {
+		data[name] = GraphData{
+			Label: name,
+			Data:  []point{p},
+		}
+	}
+}
+
 // ServeJSON remembers broadcast metrics for bufferedTime and serves them up
 // when requested based on the type field. It uses the {name} variable from
 // mux.Vars to determine which data to serve, and will serve all graphs in an
@@ -122,27 +137,47 @@ func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 	data := make(map[string]GraphData)
 	dataCh := b.Subscribe(nil)
 
+	updateData := func(name string, p point) {
+		mu.Lock()
+		defer mu.Unlock()
+		if series, ok := data[name]; ok {
+			series.Data = updateSeries(series.Data, p, bufferedTime)
+			data[name] = series
+		} else {
+			data[name] = GraphData{
+				Label: name,
+				Data:  []point{p},
+			}
+		}
+	}
+
 	go func() {
 		// Get broadcast data and process it into a map for requests.
 		for d := range dataCh {
 			switch d := d.(type) {
+
 			case Metric, *Metric:
 				m, ok := d.(Metric)
 				if !ok {
 					m = *d.(*Metric)
 				}
-				p := point{x: m.Time, y: m.Value}
-				mu.Lock()
-				if series, ok := data[m.Type]; ok {
-					series.Data = updateSeries(series.Data, p, bufferedTime)
-					data[m.Type] = series
-				} else {
-					data[m.Type] = GraphData{
-						Label: m.Type,
-						Data:  []point{p},
+				updateData(m.Type, point{x: m.Time, y: m.Value})
+
+			case messages.CANPlus, *messages.CANPlus:
+				m, ok := d.(messages.CANPlus)
+				if !ok {
+					m = *d.(*messages.CANPlus)
+				}
+				v := reflect.ValueOf(m.CAN).Elem()
+				t := reflect.TypeOf(m.CAN).Elem()
+				for i := 0; i < t.NumField(); i++ {
+					f := t.Field(i)
+					val := v.FieldByName(f.Name)
+					if k := val.Kind(); k == reflect.Float32 || k == reflect.Float64 {
+						updateData(f.Name, point{x: m.Time, y: val.Float()})
 					}
 				}
-				mu.Unlock()
+
 			}
 		}
 	}()

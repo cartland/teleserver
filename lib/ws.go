@@ -38,7 +38,7 @@ func writer(ws *websocket.Conn, ch <-chan interface{}) {
 }
 
 // ServeWS creates a http.HandlerFunc that upgrades a connection to websockets
-// and sends it broadcasted data as JSON
+// and sends it broadcasted data as JSON.
 func ServeWS(b broadcaster.Caster, u *websocket.Upgrader) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ws, err := u.Upgrade(w, r, nil)

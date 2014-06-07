@@ -1,6 +1,9 @@
 package messages
 
-import "encoding"
+import (
+	"encoding"
+	"time"
+)
 
 // IDToMessage provides a mapping from message ids to message types
 var IDToMessage = map[uint16]CAN{
@@ -17,4 +20,10 @@ type CAN interface {
 	encoding.BinaryUnmarshaler
 	// Because types aren't first class, we use New to create new messages.
 	New() CAN
+}
+
+// CANPlus is CAN with some extra stuff
+type CANPlus struct {
+	CAN  CAN
+	Time time.Time `json:"time"`
 }

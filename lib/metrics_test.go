@@ -34,9 +34,9 @@ func TestServeJSON(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	b.Cast(lib.Metric{Type: "foo", Value: 1.0, Time: 10000})
+	b.Cast(&lib.Metric{Type: "foo", Value: 1.0, Time: 10000})
 	b.Cast(lib.Metric{Type: "bar", Value: 2.0, Time: 30000})
-	b.Cast(lib.Metric{Type: "foo", Value: 3.0, Time: 40000})
+	b.Cast(&lib.Metric{Type: "foo", Value: 3.0, Time: 40000})
 	b.Cast(123)
 
 	tests := []struct{ path, want string }{
@@ -57,8 +57,8 @@ func TestServeJSON(t *testing.T) {
 
 func TestReadData(t *testing.T) {
 	testString := `:3.0}
-{"type":"foo","value":1.0}
-{"type":"bar","value":2.0}
+{"type":"foo","value":1.0}{"type":"bar","value":2.0}
+{"type":"foo","value":3.0}
 `
 	then := time.Now()
 	time.Sleep(time.Millisecond)
@@ -68,7 +68,7 @@ func TestReadData(t *testing.T) {
 
 	lib.Read(strings.NewReader(testString), b)
 
-	expected := []*lib.Metric{{Type: "foo", Value: 1.0}, {Type: "bar", Value: 2.0}}
+	expected := []*lib.Metric{{"foo", 1.0, 0}, {"bar", 2.0, 0}, {"foo", 3.0, 0}}
 	for _, e := range expected {
 		got := <-ch
 		m, ok := got.(*lib.Metric)

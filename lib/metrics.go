@@ -40,31 +40,35 @@ func toMS(t time.Time) int64 {
 	return t.UnixNano() / 1000000
 }
 
-func getSpeed() Metric {
+func getSpeed() *Metric {
 	t := time.Since(startTime)
-	return Metric{Type: "speed", Value: 50 + 10*math.Sin(t.Seconds()), Time: ms()}
+	return &Metric{Type: "speed", Value: 50 + 10*math.Sin(t.Seconds()), Time: ms()}
 }
 
-func getVolt() Metric {
+func getVolt() *Metric {
 	t := time.Since(startTime)
-	return Metric{Type: "voltage", Value: 120 + 20*math.Cos(t.Seconds()), Time: ms()}
+	return &Metric{Type: "voltage", Value: 120 + 20*math.Cos(t.Seconds()), Time: ms()}
 }
 
-func getSolar() Metric {
+func getSolar() *Metric {
 	t := time.Since(startTime)
-	return Metric{Type: "solar", Value: 1000 + 200*math.Cos(t.Seconds()), Time: ms()}
+	return &Metric{Type: "solar", Value: 1000 + 200*math.Cos(t.Seconds()), Time: ms()}
+}
+
+// readTill takes bytes from the reader until it sees b.
+func readTill(r io.Reader, b byte) {
+	p := make([]byte, 1)
+	for _, err := r.Read(p); p[0] != b; _, err = r.Read(p) {
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 // Read will continually read json from the io.Reader, interpret it as a metric,
 // and send the metric through the broadcaster.
 func Read(r io.Reader, b broadcaster.Caster) {
-	// Read until new line in case we start in the middle
-	p := make([]byte, 1)
-	for _, err := r.Read(p); p[0] != '\n'; _, err = r.Read(p) {
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	readTill(r, '\n')
 
 	d := json.NewDecoder(r)
 	for {
@@ -133,15 +137,19 @@ func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 		// Get broadcast data and process it into a map for requests.
 		for d := range dataCh {
 			switch d := d.(type) {
-			case Metric:
-				p := point{x: d.Time, y: d.Value}
+			case Metric, *Metric:
+				m, ok := d.(Metric)
+				if !ok {
+					m = *d.(*Metric)
+				}
+				p := point{x: m.Time, y: m.Value}
 				mu.Lock()
-				if series, ok := data[d.Type]; ok {
+				if series, ok := data[m.Type]; ok {
 					series.Data = updateSeries(series.Data, p, bufferedTime)
-					data[d.Type] = series
+					data[m.Type] = series
 				} else {
-					data[d.Type] = GraphData{
-						Label: d.Type,
+					data[m.Type] = GraphData{
+						Label: m.Type,
 						Data:  []point{p},
 					}
 				}
@@ -158,7 +166,7 @@ func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 		mu.Lock()
 		// Special case "all" to return all the data.
 		if name == "all" {
-			var s []GraphData
+			s := []GraphData{}
 			for _, g := range data {
 				s = append(s, g)
 			}

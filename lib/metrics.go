@@ -28,31 +28,24 @@ var startTime = time.Now()
 // Metric represents a json object with the type of metric, the value of the
 // metric, and the timestamp in milliseconds since epoch.
 type Metric struct {
-	Type  string  `json:"type"`
-	Value float64 `json:"value"`
-	Time  int64   `json:"time"`
-}
-
-func ms() int64 {
-	return toMS(time.Now())
-}
-func toMS(t time.Time) int64 {
-	return t.UnixNano() / 1000000
+	Type  string    `json:"type"`
+	Value float64   `json:"value"`
+	Time  time.Time `json:"time"`
 }
 
 func getSpeed() *Metric {
 	t := time.Since(startTime)
-	return &Metric{Type: "speed", Value: 50 + 10*math.Sin(t.Seconds()), Time: ms()}
+	return &Metric{Type: "speed", Value: 50 + 10*math.Sin(t.Seconds()), Time: time.Now()}
 }
 
 func getVolt() *Metric {
 	t := time.Since(startTime)
-	return &Metric{Type: "voltage", Value: 120 + 20*math.Cos(t.Seconds()), Time: ms()}
+	return &Metric{Type: "voltage", Value: 120 + 20*math.Cos(t.Seconds()), Time: time.Now()}
 }
 
 func getSolar() *Metric {
 	t := time.Since(startTime)
-	return &Metric{Type: "solar", Value: 1000 + 200*math.Cos(t.Seconds()), Time: ms()}
+	return &Metric{Type: "solar", Value: 1000 + 200*math.Cos(t.Seconds()), Time: time.Now()}
 }
 
 // readTill takes bytes from the reader until it sees b.
@@ -80,7 +73,7 @@ func Read(r io.Reader, b broadcaster.Caster) {
 			}
 			log.Fatal("issues reading from reader: ", err)
 		}
-		m.Time = ms()
+		m.Time = time.Now()
 		b.Cast(m)
 	}
 }
@@ -96,12 +89,12 @@ func GenFake(b broadcaster.Caster) {
 }
 
 type point struct {
-	x int64
+	x time.Time
 	y float64
 }
 
 func (p point) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("[%d,%f]", p.x, p.y)), nil
+	return []byte(fmt.Sprintf("[%d,%f]", p.x.UnixNano()/1000000, p.y)), nil
 }
 
 // GraphData represents the data for a flot graph.
@@ -110,16 +103,12 @@ type GraphData struct {
 	Data  []point `json:"data"`
 }
 
-func FromMS(milliseconds int64) time.Time {
-	return time.Unix(0, 1000000*milliseconds)
-}
-
 // updateSeries adds p to ps and removes any points from longer ago than oldest.
 func updateSeries(ps []point, p point, oldest time.Duration) []point {
-	now, then := FromMS(p.x), FromMS(ps[0].x)
+	now, then := p.x, ps[0].x
 	for len(ps) > 10 && now.Sub(then) > oldest {
-		ps = ps[1:]
-		then = FromMS(ps[0].x)
+		ps, then = ps[1:], ps[0].x
+		then = ps[0].x
 	}
 	return append(ps, p)
 }

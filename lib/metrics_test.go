@@ -34,9 +34,9 @@ func TestServeJSON(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	b.Cast(&lib.Metric{Type: "foo", Value: 1.0, Time: 10000})
-	b.Cast(lib.Metric{Type: "bar", Value: 2.0, Time: 30000})
-	b.Cast(&lib.Metric{Type: "foo", Value: 3.0, Time: 40000})
+	b.Cast(&lib.Metric{Type: "foo", Value: 1.0, Time: time.Unix(10, 0)})
+	b.Cast(lib.Metric{Type: "bar", Value: 2.0, Time: time.Unix(30, 0)})
+	b.Cast(&lib.Metric{Type: "foo", Value: 3.0, Time: time.Unix(40, 0)})
 	b.Cast(123)
 
 	tests := []struct{ path, want string }{
@@ -68,7 +68,7 @@ func TestReadData(t *testing.T) {
 
 	lib.Read(strings.NewReader(testString), b)
 
-	expected := []*lib.Metric{{"foo", 1.0, 0}, {"bar", 2.0, 0}, {"foo", 3.0, 0}}
+	expected := []*lib.Metric{{"foo", 1.0, then}, {"bar", 2.0, then}, {"foo", 3.0, then}}
 	for _, e := range expected {
 		got := <-ch
 		m, ok := got.(*lib.Metric)
@@ -80,8 +80,8 @@ func TestReadData(t *testing.T) {
 		if m.Type != e.Type || m.Value != e.Value {
 			t.Errorf("Wrong metric: got %+v, want %+v", m, e)
 		}
-		if time := lib.FromMS(m.Time); time.Before(then) || time.After(now) {
-			t.Errorf("Time %v should be between 0 and %v", time.Sub(then), now.Sub(then))
+		if m.Time.Before(then) || m.Time.After(now) {
+			t.Errorf("Time %v should be between 0 and %v", m.Time.Sub(then), now.Sub(then))
 		}
 	}
 }

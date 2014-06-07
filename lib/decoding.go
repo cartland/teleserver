@@ -18,9 +18,6 @@ const (
 	maxPayloadSize = 8
 )
 
-// CANID maps the ids of can messages to strings describing their functionality.
-var CANID = map[uint16]string{}
-
 // unescape implements decoding data streams where the data is escaped by XORing
 // significant bytes with an escape byte.
 func unescape(bs []byte) []byte {
@@ -40,8 +37,8 @@ func unescape(bs []byte) []byte {
 	}
 }
 
-// NewXSPScanner creates a scanner that divides up the input at every 0xE7
-// and decodes it at every 0x75
+// NewXSPScanner creates a scanner that divides up the input at every 0xE7 byte
+// and decodes it at every 0x75 byte.
 func NewXSPScanner(r io.Reader) *bufio.Scanner {
 	s := bufio.NewScanner(r)
 	s.Split(func(data []byte, atEOF bool) (int, []byte, error) {

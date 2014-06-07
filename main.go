@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	b := broadcaster.New()
-	lib.LogToFile(*file, b)
+	go lib.LogToFile(*file, b)
 
 	if *fake {
 		go lib.GenFake(b)
@@ -44,5 +44,6 @@ func main() {
 	r.HandleFunc("/ws", lib.ServeWS(b, &websocket.Upgrader{}))
 	r.HandleFunc("/data/{name}.json", lib.ServeJSON(b))
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public")))
-	http.ListenAndServe(fmt.Sprintf(":%d", *port), r)
+	log.Printf("Starting server on port %v", *port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), r))
 }

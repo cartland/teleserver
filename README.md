@@ -14,6 +14,8 @@ tablet. This is a proof of concept, and currently generates fake data.
 * `-port`: Port for the webserver. Default is 8080.
 * `-serial`: Port for the serial uart connection. Will error if not provided.
 * `-baud`: Baud rate for the serial port. Default is 115200.
+* `-can`: Interpret the serial input as binary CAN messages instead of JSON.
+   Default is false.
 * `-fake`: Ignore serial port, serve fake data.
 * `-log_file`: Log to a file with this prefix. "_YYYY-MM-DD_HH:MM:SS" is added
    as a suffix. Default prefix is "_tmp".

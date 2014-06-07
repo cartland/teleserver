@@ -39,13 +39,16 @@ func TestServeJSON(t *testing.T) {
 	b.Cast(lib.Metric{Type: "bar", Value: 2.0, Time: time.Unix(30, 0)})
 	b.Cast(&lib.Metric{Type: "foo", Value: 3.0, Time: time.Unix(40, 0)})
 	b.Cast(123)
+	b.Cast(messages.CANPlus{&messages.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}, time.Unix(40, 0)})
 
 	tests := []struct{ path, want string }{
 		{"/badurl", `404 page not found` + "\n"},
 		{"/nil.json", `{"label":"nil","data":null}` + "\n"},
 		{"/foo.json", `{"label":"foo","data":[[10000,1.000000],[40000,3.000000]]}` + "\n"},
 		{"/bar.json", `{"label":"bar","data":[[30000,2.000000]]}` + "\n"},
-		{"/all.json", `[{"label":"foo","data":[[10000,1.000000],[40000,3.000000]]},{"label":"bar","data":[[30000,2.000000]]}]` + "\n"},
+		{"/MotorVelocity.json", `{"label":"MotorVelocity","data":[[40000,1.000000]]}` + "\n"},
+		{"/VehicleVelocity.json", `{"label":"VehicleVelocity","data":[[40000,2.000000]]}` + "\n"},
+		{"/all.json", `[{"label":"foo","data":[[10000,1.000000],[40000,3.000000]]},{"label":"bar","data":[[30000,2.000000]]},{"label":"MotorVelocity","data":[[40000,1.000000]]},{"label":"VehicleVelocity","data":[[40000,2.000000]]}]` + "\n"},
 	}
 
 	for _, c := range tests {
@@ -53,13 +56,6 @@ func TestServeJSON(t *testing.T) {
 		if got != c.want {
 			t.Errorf("%v: got %v, want %v", c.path, got, c.want)
 		}
-	}
-}
-
-func TestServeCANJSON(t *testing.T) {
-	messages.CANPlus{
-		&messages.VelocityMeasurement{MotorVelocity: spd, VehicleVelocity: 4 * spd},
-		time.Now(),
 	}
 }
 
@@ -74,7 +70,7 @@ func TestReadData(t *testing.T) {
 	defer b.Close()
 	ch := b.Subscribe(nil)
 
-	lib.Read(strings.NewReader(testString), b)
+	lib.ReadJSON(strings.NewReader(testString), b)
 
 	expected := []*lib.Metric{{"foo", 1.0, then}, {"bar", 2.0, then}, {"foo", 3.0, then}}
 	for _, e := range expected {

@@ -22,19 +22,14 @@ body {
   text-align: center;
 }
 
-@media screen and (min-width: 0px) and (max-width: 849px) {
+@media screen and (max-width: 849px) {
   .plot-placeholder {
-    height: 200px;
-  }
-}
-
-@media screen and (min-width: 850px) {
-  .plot-placeholder {
-    width: 850px;
-    height: 450px;
+    display:none;
   }
 }
 
 .plot-placeholder {
+    height: 450px;
+    width: 850px;
   margin: auto;
 }

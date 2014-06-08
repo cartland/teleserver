@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"time"
 
 	"github.com/calsol/teleserver/messages"
 	"github.com/stvnrhodes/broadcaster"
@@ -115,6 +114,6 @@ func ReadCAN(r io.Reader, b broadcaster.Caster) {
 			log.Print(err)
 			continue
 		}
-		b.Cast(messages.CANPlus{msg, time.Now()})
+		b.Cast(messages.NewCANPlus(msg))
 	}
 }

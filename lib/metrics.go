@@ -44,10 +44,7 @@ func getPower() messages.CANPlus {
 	t := time.Since(startTime)
 	v := float32(100 + 10*math.Sin(t.Seconds()))
 	a := v/4 + float32(10*math.Sin(t.Seconds()/1.8))
-	return messages.CANPlus{
-		&messages.BusMeasurement{BusVoltage: v, BusCurrent: a},
-		time.Now(),
-	}
+	return messages.NewCANPlus(&messages.BusMeasurement{BusVoltage: v, BusCurrent: a})
 }
 
 // readTill takes bytes from the reader until it sees b.

@@ -37,7 +37,7 @@ type Metric struct {
 
 func getSpeed() *Metric {
 	t := time.Since(startTime)
-	return &Metric{Type: "speed", Value: 50 + 20*math.Cos(t.Seconds()), Time: time.Now()}
+	return &Metric{Type: "VehicleVelocity", Value: 50 + 20*math.Cos(t.Seconds()), Time: time.Now()}
 }
 
 func getPower() messages.CANPlus {

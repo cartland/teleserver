@@ -13,7 +13,7 @@ import (
 	"github.com/stvnrhodes/broadcaster"
 )
 
-const maxFileSize = 1 << 16
+const maxFileSize = 1 << 20
 
 func logName(path string, t time.Time) string {
 	return fmt.Sprintf("%s_%s.txt", path, t.Format("2006-01-02_15:04:05"))

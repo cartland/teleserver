@@ -4,7 +4,7 @@ This is a prototype of a telemetry server for a solar car, capable of displaying
 a simplified dashboard on a phone or a more complete dashboard on a laptop or
 tablet.
 
-To use, at minimum you must supply `-fake`, `-serial`, or `-can` as a data source.
+At minimum you must supply `-fake`, `-serial`, or `-can_addr` as a data source.
 
 ## Installation
 1. Install the most recent version of go from http://golang.org/doc/install
@@ -24,7 +24,7 @@ To install go-bindata, run `go get github.com/jteeuwen/go-bindata/...`
 * `-serial`: Port for the serial uart connection.
 * `-baud`: Baud rate for the serial port. Default is 115200.
 * `-can_addr`: Port for SocketCAN.
-* `-fake`: Ignore serial port, serve fake data.
+* `-fake`: Ignore ports, serve fake data.
 * `-can_log_file`: Log all CAN messages to a file with this prefix (can include
   filepath). "_YYYY-MM-DD_HH:MM:SS" is added as a suffix. Default prefix is "_tmp".
 * `-alsologto`: In addition to logging general messages to stdout, log them to

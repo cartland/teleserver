@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 
+	"github.com/calsol/teleserver/can"
 	"github.com/calsol/teleserver/messages"
 	"github.com/stvnrhodes/broadcaster"
 )
@@ -58,6 +59,8 @@ func NewXSPScanner(r io.Reader) *bufio.Scanner {
 	return s
 }
 
+// newCANFromBytes takes the raw bytes of a CAN message and parses it into a
+// semantically useful message.
 func newCANFromBytes(b []byte) (messages.CAN, error) {
 	if len(b) < 2 {
 		return nil, fmt.Errorf("message was too short: %v", b)
@@ -86,30 +89,50 @@ func newCANFromBytes(b []byte) (messages.CAN, error) {
 	return msg, nil
 }
 
-// CANReader allows reading CAN messages from an io.Reader.
-type CANReader struct {
+// CANReader is capable of reading CAN messages.
+type CANReader interface {
+	// Read gets the next message from the CANReader
+	Read() (messages.CAN, error)
+}
+
+// xspCANReader allows reading CAN messages from a XSP Serial CAN connection.
+type xspCANReader struct {
 	b *bufio.Scanner
 }
 
-// NewCanReader creates a reader that scans the reader as XSP and parses as CAN.
-func NewCANReader(r io.Reader) *CANReader {
-	return &CANReader{b: NewXSPScanner(r)}
+// NewXSPCANReader creates a reader that scans as XSP and parses as CAN.
+func NewXSPCANReader(r io.Reader) CANReader {
+	return &xspCANReader{b: NewXSPScanner(r)}
 }
-
-// Read returns the next CAN message from the input.
-func (c *CANReader) Read() (messages.CAN, error) {
+func (c *xspCANReader) Read() (messages.CAN, error) {
 	if c.b.Scan() {
 		return newCANFromBytes(c.b.Bytes())
 	}
 	return nil, c.b.Err()
 }
 
+type socketCANReader struct {
+	c *can.Conn
+	b []byte
+}
+
+// NewSocketCANReader creates a reader that reads from a SocketCAN connection
+// and returns complete messages
+func NewSocketCANReader(c *can.Conn) CANReader { return socketCANReader{c, make([]byte, 16)} }
+func (s socketCANReader) Read() (messages.CAN, error) {
+	if n, err := s.c.Read(s.b); err != nil {
+		return nil, err
+	} else if n != len(s.b) {
+		return nil, fmt.Errorf("got %d bytes, want %d", n, len(s.b))
+	}
+	return newCANFromBytes(s.b)
+}
+
 // ReadCAN will continually read bytes from the io.Reader, interpret them as
 // binary CAN messages, and send them through the broadcaster.
-func ReadCAN(r io.Reader, b broadcaster.Caster) {
-	c := NewCANReader(r)
+func ReadCAN(r CANReader, b broadcaster.Caster) {
 	for {
-		msg, err := c.Read()
+		msg, err := r.Read()
 		if err != nil {
 			log.Print(err)
 			continue

@@ -85,7 +85,7 @@ func TestReadCAN(t *testing.T) {
 	}
 
 	for i, c := range tests {
-		r := lib.NewCANReader(strings.NewReader(c.data))
+		r := lib.NewXSPCANReader(strings.NewReader(c.data))
 		for j, want := range c.want {
 			msg, err := r.Read()
 			if err != nil && err.Error() != want.err {

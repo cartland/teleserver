@@ -39,7 +39,8 @@ func TestServeJSON(t *testing.T) {
 	b.Cast(lib.Metric{Type: "bar", Value: 2.0, Time: time.Unix(30, 0)})
 	b.Cast(&lib.Metric{Type: "foo", Value: 3.0, Time: time.Unix(40, 0)})
 	b.Cast(123)
-	b.Cast(messages.CANPlus{&messages.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}, time.Unix(40, 0)})
+	m := &messages.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}
+	b.Cast(messages.CANPlus{m, messages.GetID(m), time.Unix(40, 0)})
 
 	tests := []struct{ path, want string }{
 		{"/badurl", `404 page not found` + "\n"},

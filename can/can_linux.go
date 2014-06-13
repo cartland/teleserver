@@ -11,10 +11,8 @@ CONFIG_CAN_VCAN=m
 
 import (
 	"encoding/binary"
-	"io"
 	"log"
 	"reflect"
-	"sync"
 	"syscall"
 )
 
@@ -50,15 +48,10 @@ type ifReq struct {
 // that holds a lock when reading or writing. Do not try opening the same
 // connection twice or reusing a closed connection, there's nothing to protect
 // you.
-func Dial(ifname string) (io.ReadWriteCloser, error) {
+func Dial(ifname string) (*Conn, error) {
 	fd, err := syscall.Socket(syscall.AF_CAN, syscall.SOCK_RAW, CAN_RAW)
 	if err != nil {
 		log.Println("Failed to open socket")
-		return nil, err
-	}
-	if err = syscall.SetNonblock(fd, true); err != nil {
-		log.Println("Failed to set socket as nonblocking")
-		syscall.Close(fd)
 		return nil, err
 	}
 
@@ -78,7 +71,7 @@ func Dial(ifname string) (io.ReadWriteCloser, error) {
 		return nil, err
 	}
 
-	return &conn{ifname: ifname, fd: fd}, nil
+	return &Conn{ifname: ifname, fd: fd}, nil
 }
 
 func ptrAndSize(n interface{}) (ptr, size uintptr) {
@@ -105,26 +98,4 @@ func bind(fd int, sockAddr interface{}) error {
 	ptr, size := ptrAndSize(sockAddr)
 	_, _, errno := syscall.Syscall(syscall.SYS_BIND, uintptr(fd), ptr, size)
 	return toErr(errno)
-}
-
-type conn struct {
-	ifname string
-	fd     int
-	mu     sync.Mutex
-}
-
-func (c *conn) Read(b []byte) (n int, err error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return syscall.Read(c.fd, b)
-}
-
-func (c *conn) Write(b []byte) (n int, err error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return syscall.Write(c.fd, b)
-}
-
-func (c *conn) Close() error {
-	return syscall.Close(c.fd)
 }

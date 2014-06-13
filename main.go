@@ -63,16 +63,16 @@ func main() {
 	r.HandleFunc("/data/{name}.json", lib.ServeJSON(b))
 
 	if *embed {
-		// TODO(stvn): This should be made cleaner
+		log.Println("Serving embedded content")
 		r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			file := path.Join("public", r.URL.Path)
-			if file == "public" {
-				file = "public/index.html"
-			}
 			b, err := embedded.Asset(file)
 			if err != nil {
-				http.Error(w, "Could not find "+file, 404)
-				return
+				b, err = embedded.Asset(path.Join(file, "index.html"))
+				if err != nil {
+					http.Error(w, "Could not find "+file, 404)
+					return
+				}
 			}
 			switch path.Ext(file) {
 			case ".css":

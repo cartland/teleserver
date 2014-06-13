@@ -6,9 +6,10 @@ tablet. This is a proof of concept, and currently generates fake data.
 
 ## Installation
 1. Install the most recent version of go from http://golang.org/doc/install
-2. Run `go get github.com/calsol/teleserver` to fetch the binary
-3. Run the binary (`$GOPATH/bin/teleserver -serial /dev/tty`)
-4. Navigate to http://localhost:8080
+2. Create your $GOPATH with `mkdir $HOME/go && export GOPATH=$HOME/go` (http://golang.org/doc/code.html)
+3. Run `go get github.com/calsol/teleserver` to fetch the binary
+4. Run the binary (`$GOPATH/bin/teleserver -serial /dev/tty`)
+5. Navigate to http://localhost:8080
 
 After changing any files in the /public directory, be sure to run
  `go-bindata -o embedded/assets.go -pkg embedded public/...`. This will

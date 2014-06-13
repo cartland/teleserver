@@ -19,6 +19,15 @@ import (
 )
 
 const (
+	CAN_RAW   = iota + 1 /* RAW sockets */
+	CAN_BCM              /* Broadcast Manager */
+	CAN_TP16             /* VAG Transport Protocol v1.6 */
+	CAN_TP20             /* VAG Transport Protocol v2.0 */
+	CAN_MCNET            /* Bosch MCNet */
+	CAN_ISOTP            /* ISO 15765-2 Transport Protocol */
+	CAN_NPROTO
+)
+const (
 	ifnamsiz = 16 /* Size of the name for ifreq */
 )
 

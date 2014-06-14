@@ -1,15 +1,18 @@
 package lib_test
 
 import (
+	"bytes"
+	"encoding/binary"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/calsol/teleserver/can"
 	"github.com/calsol/teleserver/lib"
 	"github.com/calsol/teleserver/messages"
 )
 
-func TestDemuxDecode(t *testing.T) {
+func TestXSPDecode(t *testing.T) {
 	tests := []struct {
 		data string
 		want []string
@@ -86,6 +89,65 @@ func TestReadCAN(t *testing.T) {
 
 	for i, c := range tests {
 		r := lib.NewXSPCANReader(strings.NewReader(c.data))
+		for j, want := range c.want {
+			msg, err := r.Read()
+			if err != nil && err.Error() != want.err {
+				t.Errorf("%d: on %d got error %q, want %q", i, j, err, want.err)
+			}
+			if !reflect.DeepEqual(msg, want.msg) {
+				t.Errorf("%d: on %d got %v, want %v", i, j, msg, want.msg)
+			}
+		}
+	}
+}
+
+func TestReadSocketCAN(t *testing.T) {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, can.NewFrame(0x502, []byte{0x66, 0x66, 0x36, 0x42, 0xcd, 0xcc, 0x44, 0x41}))
+	binary.Write(buf, binary.LittleEndian, can.NewFrame(0x403, []byte{0x00, 0x80, 0xad, 0x43, 0x41, 0xb1, 0x2d, 0x42}))
+	test4Data := buf.String()
+
+	tests := []struct {
+		data string
+		want []msgAndErr
+	}{
+		{
+			data: "bad",
+			want: []msgAndErr{
+				{err: "got 3 bytes, want 16"},
+			},
+		},
+		{
+			data: "this is 16 chars",
+			want: []msgAndErr{
+				{err: "packet 0x73696874: payload size 8 is greater than 32: [49 54 32 99 104 97 114 115]"},
+				{err: "EOF"},
+			},
+		},
+		{
+			data: "thi\x00s is more than 16 chars",
+			want: []msgAndErr{
+				{err: "packet 0x696874: payload size 8 is greater than 115: [32 109 111 114 101 32 116 104]"},
+				{err: "got 11 bytes, want 16"},
+			},
+		},
+		{
+			data: "\x01\x05\x00\x00" + "\x08" + "\x00\x00\x00" + "\xcd\xcc\x44\x41\x66\x66\x36\x42",
+			want: []msgAndErr{
+				{msg: &messages.MotorDriveCommand{MotorCurrent: 12.3, MotorVelocity: 45.6}},
+			},
+		},
+		{
+			data: test4Data,
+			want: []msgAndErr{
+				{msg: &messages.MotorPowerCommand{BusCurrent: 12.3}},
+				{msg: &messages.VelocityMeasurement{MotorVelocity: 347, VehicleVelocity: 43.4231}},
+			},
+		},
+	}
+
+	for i, c := range tests {
+		r := lib.NewSocketCANReader(strings.NewReader(c.data))
 		for j, want := range c.want {
 			msg, err := r.Read()
 			if err != nil && err.Error() != want.err {

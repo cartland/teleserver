@@ -100,7 +100,9 @@ type xspCANReader struct {
 	b *bufio.Scanner
 }
 
-// NewXSPCANReader creates a reader that scans as XSP and parses as CAN.
+// NewXSPCANReader creates a reader that scans as XSP and parses as CAN. The XSP
+// format reads a stream of bytes and uses a separator character to split
+// individual messages apart
 func NewXSPCANReader(r io.Reader) CANReader {
 	return &xspCANReader{b: NewXSPScanner(r)}
 }
@@ -112,20 +114,42 @@ func (c *xspCANReader) Read() (messages.CAN, error) {
 }
 
 type socketCANReader struct {
-	c *can.Conn
-	b []byte
+	r io.Reader
+}
+
+// We fudge the numbers a bit here so that this matches XSPCAN messages. We
+// remove the padding, combine the length with the id, and truncate the data.
+// If we ever deprecate XSPCAN, newCANFromBytes should probably be changed to
+// expect binary encodings of can.Frame.
+func changeSocketCANEncoding(b []byte) ([]byte, error) {
+	id := binary.LittleEndian.Uint32(b[:4])
+	body := b[8:]
+	length := b[4]
+	if int(length) > len(body) {
+		return nil, fmt.Errorf("packet 0x%x: payload size %d is greater than %d: %v", id, len(body), length, body)
+	}
+	ids := make([]byte, 4)
+	binary.LittleEndian.PutUint32(ids, id<<4)
+	ids[0] |= length
+	return append(ids[:2], body[:length]...), nil
 }
 
 // NewSocketCANReader creates a reader that reads from a SocketCAN connection
-// and returns complete messages
-func NewSocketCANReader(c *can.Conn) CANReader { return socketCANReader{c, make([]byte, 16)} }
+// and returns complete messages. The SocketCAN format reads can.FrameSize bytes
+// at a time and interprets them as a complete CAN message.
+func NewSocketCANReader(r io.Reader) CANReader { return socketCANReader{r} }
 func (s socketCANReader) Read() (messages.CAN, error) {
-	if n, err := s.c.Read(s.b); err != nil {
+	b := make([]byte, can.FrameSize)
+	if n, err := s.r.Read(b); err != nil {
 		return nil, err
-	} else if n != len(s.b) {
-		return nil, fmt.Errorf("got %d bytes, want %d", n, len(s.b))
+	} else if n != len(b) {
+		return nil, fmt.Errorf("got %d bytes, want %d", n, len(b))
 	}
-	return newCANFromBytes(s.b)
+	msg, err := changeSocketCANEncoding(b)
+	if err != nil {
+		return nil, err
+	}
+	return newCANFromBytes(msg)
 }
 
 // ReadCAN will continually read bytes from the io.Reader, interpret them as

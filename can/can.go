@@ -3,11 +3,10 @@ package can
 import (
 	"bytes"
 	"encoding/binary"
+	"reflect"
 	"sync"
 	"syscall"
 )
-
-// +build !linux
 
 const (
 	/* special address description flags for the CAN_ID */
@@ -20,6 +19,8 @@ const (
 	CAN_EFF_MASK = 0x1FFFFFFF /* extended frame format (EFF) */
 	CAN_ERR_MASK = 0x1FFFFFFF /* omit EFF, RTR, ERR flags */
 )
+
+var FrameSize = reflect.TypeOf(Frame{}).Size()
 
 // Frame represents a single CAN frame.
 // This matches struct can_frame in include/uapi/linux/can.h

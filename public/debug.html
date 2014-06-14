@@ -31,17 +31,18 @@ $(function() {
 
   function createOrUpdate(time, id, message, val) {
     if (!paused) {
-      if (!$("#" + message).length) {
+      var uniq = id + "_" + message
+      if (!$("#" + uniq).length) {
         $("#debug").append(
-          '<tr id="' + message + '">' +
+          '<tr id="' + uniq + '">' +
             '<th class="time"></th>' +
             '<th class="id">' + id.toString(16) + '</th>' +
             '<th class="message">' + message + '</th>' +
             '<th class="value"></th>' +
           '</tr>');
       }
-      $("#" + message + ' .time').text(time);
-      $("#" + message + ' .value').text(val);
+      $("#" + uniq + ' .time').text(time);
+      $("#" + uniq + ' .value').text(val);
     }
   }
 

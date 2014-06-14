@@ -47,7 +47,10 @@ func main() {
 
 	// All data is distributed to all web connections,
 	b := broadcaster.New()
-	go lib.LogToFile(*canFile, b)
+
+	if *canFile != "" {
+		go lib.LogToFile(*canFile, b)
+	}
 
 	// We select one of the possible sources to cast data nto the broadcaster
 	if *fake {

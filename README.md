@@ -19,6 +19,10 @@ After changing any files in the /public directory, be sure to run
 
 To install go-bindata, run `go get github.com/jteeuwen/go-bindata/...`
 
+### Tips and tricks
+1. Check out /debug.html for a table of all message types as they come in.
+2. Similarly, /dump.html will spit out each message recieved from the server.
+
 ### Flags
 * `-port`: Port for the webserver. Default is 8080.
 * `-serial`: Port for the serial uart connection.

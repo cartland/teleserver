@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Debugging</title>
+<link rel="shortcut icon" href="/favicon.ico" />
+
+<div>
+  Messages will continually be updated in the list below. Only complete JSON
+  messages with a timestamp and a parseable structure will be recorded. Pausing
+  will ignore messages sent over the socket.
+</div>
+<div>
+  <input type="checkbox" id="pause"> Pause
+</div>
+
+<table id="debug">
+  <tr>
+    <th>Time</th>
+    <th>ID</th>
+    <th>Message</th>
+    <th>Value</th>
+  </tr>
+</table>
+
+<script language="javascript" type="text/javascript" src="/flot/jquery.min.js"></script>
+<script language="javascript">
+$(function() {
+  var paused = false;
+  $('#pause').click(function () {
+      paused = this.checked;
+  });
+
+  function createOrUpdate(time, id, message, val) {
+    if (!paused) {
+      if (!$("#" + message).length) {
+        $("#debug").append(
+          '<tr id="' + message + '">' +
+            '<th class="time"></th>' +
+            '<th class="id">' + id.toString(16) + '</th>' +
+            '<th class="message">' + message + '</th>' +
+            '<th class="value"></th>' +
+          '</tr>');
+      }
+      $("#" + message + ' .time').text(time);
+      $("#" + message + ' .value').text(val);
+    }
+  }
+
+  // Create a websocket connection and do live updates of the data
+  var ws = new WebSocket("ws://" + window.location.host + "/ws");
+  ws.onmessage = function(e) {
+    var data = JSON.parse(e.data);
+
+    if (data.type) {
+      createOrUpdate(data.time, data.type, data.type, data.value);
+    }
+    if (data.CAN) {
+      for (var key in data.CAN) {
+        if (data.CAN.hasOwnProperty(key)) {
+            createOrUpdate(data.time, data.canID, key, data.CAN[key]);
+        }
+      }
+    }
+  }
+});
+</script>

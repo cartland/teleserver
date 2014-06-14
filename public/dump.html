@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Dumping</title>
+<link rel="shortcut icon" href="/favicon.ico" />
+
+<div>
+  Messages will continually be appended to the list below. Pausing will ignore
+  messages sent over the socket.
+</div>
+<div>
+  <input type="checkbox" id="pause"> Pause
+</div>
+
+<div id="debug">
+</div>
+
+<script language="javascript" type="text/javascript" src="/flot/jquery.min.js"></script>
+<script language="javascript">
+$(function() {
+  var paused = false;
+  $('#pause').click(function () {
+      paused = this.checked;
+  });
+
+  // Create a websocket connection and do live updates of the data
+  var ws = new WebSocket("ws://" + window.location.host + "/ws");
+  ws.onmessage = function(e) {
+    if (!paused) {
+      $("#debug").append(e.data + '<br>');
+    }
+  }
+});
+</script>

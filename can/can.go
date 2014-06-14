@@ -43,10 +43,11 @@ func NewFrame(id uint32, data []byte) *Frame {
 
 // Conn holds a connection to the CAN socket.
 type Conn struct {
-	ifname string
-	fd     int
-	mu     sync.Mutex
-	buf    bytes.Buffer
+	ifname    string
+	fd        int
+	readLock  sync.Mutex
+	writeLock sync.Mutex
+	buf       bytes.Buffer
 }
 
 // ReadFrame reads an entire CAN frame at once and returns it. It's recommended
@@ -68,8 +69,8 @@ func (c *Conn) WriteFrame(f *Frame) error {
 // When reading, you should pass in a slice at least 16 bytes long to fit an
 // entire frame.
 func (c *Conn) Read(b []byte) (int, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.readLock.Lock()
+	defer c.readLock.Unlock()
 	if c.buf.Len() == 0 {
 		buf := make([]byte, 16)
 		n, err := syscall.Read(c.fd, buf)
@@ -83,8 +84,8 @@ func (c *Conn) Read(b []byte) (int, error) {
 
 // When writing, an entire CAN frame should be passed in at a time.
 func (c *Conn) Write(b []byte) (int, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.writeLock.Lock()
+	defer c.writeLock.Unlock()
 	return syscall.Write(c.fd, b)
 }
 

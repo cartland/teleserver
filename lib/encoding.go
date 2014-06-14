@@ -32,9 +32,7 @@ func frameFromForm(dataType string, r *http.Request) (*can.Frame, error) {
 			}
 			b = append(b, byte(formByte))
 		}
-		f := &can.Frame{ID: uint32(id), DataLen: uint8(len(b))}
-		copy(f.Data[:], b)
-		return f, nil
+		return can.NewFrame(uint32(id), b), nil
 
 	case "floats":
 		var floats []float32
@@ -51,9 +49,7 @@ func frameFromForm(dataType string, r *http.Request) (*can.Frame, error) {
 				return nil, fmt.Errorf("binary.Write failed: %v", err)
 			}
 		}
-		f := &can.Frame{ID: uint32(id), DataLen: 8}
-		copy(f.Data[:], buf.Bytes())
-		return f, nil
+		return can.NewFrame(uint32(id), buf.Bytes()), nil
 
 	default:
 		return nil, fmt.Errorf("%s is an invalid send type", dataType)

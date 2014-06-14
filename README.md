@@ -23,6 +23,7 @@ To install go-bindata, run `go get github.com/jteeuwen/go-bindata/...`
 1. Check out /debug.html for a table of all message types as they come in.
 2. Similarly, /dump.html will spit out each message recieved from the server.
 3. If using SocketCAN, /sendcan.html allows you to send messages one at a time.
+4. `go test github.com/calsol/teleserver/...` helps verify code correctness.
 
 ### Flags
 * `-port`: Port for the webserver. Default is 8080.

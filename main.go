@@ -20,8 +20,6 @@ import (
 	"github.com/tarm/goserial"
 )
 
-const basePkg = "github.com/calsol/teleserver"
-
 func main() {
 	port := flag.Int("port", 8080, "Port for the webserver")
 	uart := flag.String("serial", "", "Serial port for talking to the car")
@@ -95,7 +93,7 @@ func main() {
 		log.Println("Serving embedded content")
 		r.PathPrefix("/").HandlerFunc(embedded.ServeFiles)
 	} else {
-		p, err := build.Default.Import(basePkg, "", build.FindOnly)
+		p, err := build.Default.Import(embedded.BasePkg, "", build.FindOnly)
 		if err != nil {
 			log.Fatalf("Couldn't find resource files: %v", err)
 		}

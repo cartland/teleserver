@@ -5,6 +5,8 @@ import (
 	"path"
 )
 
+const BasePkg = "github.com/calsol/teleserver"
+
 func ServeFiles(w http.ResponseWriter, r *http.Request) {
 	file := path.Join("public", r.URL.Path)
 	b, err := Asset(file)

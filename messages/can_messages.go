@@ -18,6 +18,9 @@ var IDToMessage = map[uint16]CAN{
 
 // GetID returns the ID of a CAN message based on the mapping in IDToMessage.
 func GetID(msg CAN) uint16 {
+	if u, ok := msg.(*Unknown); ok {
+		return u.CANID
+	}
 	msgType := reflect.TypeOf(msg)
 	for id, typ := range IDToMessage {
 		if reflect.TypeOf(typ) == msgType {
@@ -44,4 +47,18 @@ type CANPlus struct {
 	CAN   CAN
 	CANID uint16    `json:"canID"`
 	Time  time.Time `json:"time"`
+}
+
+// Unknown is used if no id is recognized.
+type Unknown struct {
+	// When creating an Unknown message, be sure to include the CANID so that
+	// GetID will return the correct id.
+	CANID uint16 `json:"-"`
+	Data  [8]byte
+}
+
+func (u Unknown) New() CAN { return &Unknown{CANID: u.CANID} }
+func (u *Unknown) UnmarshalBinary(b []byte) error {
+	copy(u.Data[:], b)
+	return nil
 }

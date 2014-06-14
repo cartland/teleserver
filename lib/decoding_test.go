@@ -67,7 +67,7 @@ func TestReadCAN(t *testing.T) {
 			data: "bad\xe7beef",
 			want: []msgAndErr{
 				{err: "packet 0x616: payload size 2 != actual size 1: [100]"},
-				{err: "packet 0x656: unknown id, size 2: [101 102]"},
+				{msg: &messages.Unknown{CANID: 0x656, Data: [8]byte{101, 102, 0, 0, 0, 0, 0, 0}}},
 			},
 		},
 		{
@@ -95,7 +95,7 @@ func TestReadCAN(t *testing.T) {
 				t.Errorf("%d: on %d got error %q, want %q", i, j, err, want.err)
 			}
 			if !reflect.DeepEqual(msg, want.msg) {
-				t.Errorf("%d: on %d got %v, want %v", i, j, msg, want.msg)
+				t.Errorf("%d: on %d got %#v, want %#v", i, j, msg, want.msg)
 			}
 		}
 	}
@@ -154,7 +154,7 @@ func TestReadSocketCAN(t *testing.T) {
 				t.Errorf("%d: on %d got error %q, want %q", i, j, err, want.err)
 			}
 			if !reflect.DeepEqual(msg, want.msg) {
-				t.Errorf("%d: on %d got %v, want %v", i, j, msg, want.msg)
+				t.Errorf("%d: on %d got %#v, want %#v", i, j, msg, want.msg)
 			}
 		}
 	}

@@ -77,7 +77,7 @@ func newCANFromBytes(b []byte) (messages.CAN, error) {
 	}
 	msg, ok := messages.IDToMessage[id]
 	if !ok {
-		return nil, fmt.Errorf("packet 0x%x: unknown id, size %d: %v", id, length, body)
+		msg = &messages.Unknown{CANID: id}
 	}
 
 	// Make a new copy of the message to prevent changing the one in the id map.

@@ -12,19 +12,19 @@
 </div>
 <br>
 <div>
-  <form name="input" action="/send" method="post">
+  <form name="input" action="/sendbytes" method="post">
   CAN ID: <input type="number" name="id" min="0" max="4095">
-  Length (1-8 bytes): <input type="number" name="length" min="0" max="8">
+  Length (1-8 bytes): <input type="number" name="length" min="1" max="8">
   <br>
   Raw bytes:
-  <input type="number" name="byte0" min="0" max="255">
-  <input type="number" name="byte1" min="0" max="255">
-  <input type="number" name="byte2" min="0" max="255">
-  <input type="number" name="byte3" min="0" max="255">
-  <input type="number" name="byte4" min="0" max="255">
-  <input type="number" name="byte5" min="0" max="255">
-  <input type="number" name="byte6" min="0" max="255">
-  <input type="number" name="byte7" min="0" max="255">
+  <input type="number" name="byte0" min="0" max="255" value="0">
+  <input type="number" name="byte1" min="0" max="255" value="0">
+  <input type="number" name="byte2" min="0" max="255" value="0">
+  <input type="number" name="byte3" min="0" max="255" value="0">
+  <input type="number" name="byte4" min="0" max="255" value="0">
+  <input type="number" name="byte5" min="0" max="255" value="0">
+  <input type="number" name="byte6" min="0" max="255" value="0">
+  <input type="number" name="byte7" min="0" max="255" value="0">
   <input type="submit" value="Submit">
   </form>
 </div>
@@ -35,14 +35,13 @@
 </div>
 <br>
 <div>
-  <form name="input" action="/send" method="post">
+  <form name="input" action="/sendfloats" method="post">
   CAN ID: <input type="number" name="id" min="0" max="4095">
-  We send a fixed size of 8 (2 floats) (1-8 bytes)
-  <input  name="length" value="8" hidden>
+  We set a fixed size of 8 (2 floats) (1-8 bytes)
   <br>
   Floating point numbers:
+  <input type="number" step="any" name="float0">
   <input type="number" step="any" name="float1">
-  <input type="number" step="any" name="float2">
   <input type="submit" value="Submit">
   </form>
 </div>

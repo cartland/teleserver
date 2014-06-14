@@ -1,13 +1,49 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>Debugging</title>
+<title>Send to CAN</title>
 <link rel="shortcut icon" href="/favicon.ico" />
 
 <div>
-  Send a CAN message encoded byte by byte.
+  Send a CAN message encoded byte by byte. All messages are in decimal because
+  Steven Rhodes is lazy and doesn't want to do validation for hexadecimal
+  numbers. Please be friendly to the inputs, the server will yell at you if you
+  bypass the client side validation and send anything that isn't either an
+  ascii number or an empty string.
+</div>
+<br>
+<div>
+  <form name="input" action="/send" method="post">
+  CAN ID: <input type="number" name="id" min="0" max="4095">
+  Length (1-8 bytes): <input type="number" name="length" min="0" max="8">
+  <br>
+  Raw bytes:
+  <input type="number" name="byte0" min="0" max="255">
+  <input type="number" name="byte1" min="0" max="255">
+  <input type="number" name="byte2" min="0" max="255">
+  <input type="number" name="byte3" min="0" max="255">
+  <input type="number" name="byte4" min="0" max="255">
+  <input type="number" name="byte5" min="0" max="255">
+  <input type="number" name="byte6" min="0" max="255">
+  <input type="number" name="byte7" min="0" max="255">
+  <input type="submit" value="Submit">
+  </form>
+</div>
+<br>
+<div>
+  Having a message that's two floating point numbers is pretty common too. Let's
+  add another input for that.
+</div>
+<br>
+<div>
+  <form name="input" action="/send" method="post">
+  CAN ID: <input type="number" name="id" min="0" max="4095">
+  We send a fixed size of 8 (2 floats) (1-8 bytes)
+  <input  name="length" value="8" hidden>
+  <br>
+  Floating point numbers:
+  <input type="number" step="any" name="float1">
+  <input type="number" step="any" name="float2">
+  <input type="submit" value="Submit">
+  </form>
 </div>
 
-<form name="input" action="/send" method="post">
-Username: <input type="text" name="user">
-<input type="submit" value="Submit">
-</form>

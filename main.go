@@ -48,6 +48,12 @@ func main() {
 	// All data is distributed to all web connections,
 	b := broadcaster.New()
 
+	// sendToCan is a dummy function that can be replaced by a real implementation
+	sendToCAN := func(w http.ResponseWriter, r *http.Request) {
+		log.Print("Got CAN request, ignoring because no implementation")
+		http.Error(w, "No CANSocket, not possible. Use the web browser to go back.", http.StatusNotImplemented)
+	}
+
 	// If an empty string is provided, that means we don't want to log messages.
 	if *canFile != "" {
 		go lib.LogToFile(*canFile, b)
@@ -83,6 +89,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/ws", lib.ServeWS(b, &websocket.Upgrader{}))
 	r.HandleFunc("/data/{name}.json", lib.ServeJSON(b))
+	r.HandleFunc("/send", sendToCAN).Methods("POST")
 
 	// We either serve from embedded so that the binary is standalone, or from
 	// /public for rapid development and live changes.

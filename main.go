@@ -48,6 +48,7 @@ func main() {
 	// All data is distributed to all web connections,
 	b := broadcaster.New()
 
+	// If an empty string is provided, that means we don't want to log messages.
 	if *canFile != "" {
 		go lib.LogToFile(*canFile, b)
 	}

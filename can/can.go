@@ -9,17 +9,18 @@ import (
 )
 
 const (
-	/* special address description flags for the CAN_ID */
-	CAN_EFF_FLAG = 0x80000000 /* EFF/SFF is set in the MSB */
-	CAN_RTR_FLAG = 0x40000000 /* remote transmission request */
-	CAN_ERR_FLAG = 0x20000000 /* error frame */
+	// special address description flags for the CAN_ID
+	CAN_EFF_FLAG = 0x80000000 // EFF/SFF is set in the MSB
+	CAN_RTR_FLAG = 0x40000000 // remote transmission request
+	CAN_ERR_FLAG = 0x20000000 // error frame
 
-	/* valid bits in CAN ID for frame formats */
-	CAN_SFF_MASK = 0x000007FF /* standard frame format (SFF) */
-	CAN_EFF_MASK = 0x1FFFFFFF /* extended frame format (EFF) */
-	CAN_ERR_MASK = 0x1FFFFFFF /* omit EFF, RTR, ERR flags */
+	// valid bits in CAN ID for frame formats
+	CAN_SFF_MASK = 0x000007FF // standard frame format (SFF)
+	CAN_EFF_MASK = 0x1FFFFFFF // extended frame format (EFF)
+	CAN_ERR_MASK = 0x1FFFFFFF // omit EFF, RTR, ERR flags
 )
 
+// FrameSize is the size of the Frame struct.
 var FrameSize = reflect.TypeOf(Frame{}).Size()
 
 // Frame represents a single CAN frame.
@@ -66,8 +67,8 @@ func (c *Conn) WriteFrame(f *Frame) error {
 	return binary.Write(c, binary.LittleEndian, f)
 }
 
-// When reading, you should pass in a slice at least 16 bytes long to fit an
-// entire frame.
+// Read reads bytes from the CAN socket. When reading, you should pass in a
+// slice at least 16 bytes long to fit an entire frame.
 func (c *Conn) Read(b []byte) (int, error) {
 	c.readLock.Lock()
 	defer c.readLock.Unlock()
@@ -82,13 +83,15 @@ func (c *Conn) Read(b []byte) (int, error) {
 	return c.buf.Read(b)
 }
 
-// When writing, an entire CAN frame should be passed in at a time.
+// Conn writes bytes to the CAN socket. When writing, an entire CAN frame should
+// be passed in at a time.
 func (c *Conn) Write(b []byte) (int, error) {
 	c.writeLock.Lock()
 	defer c.writeLock.Unlock()
 	return syscall.Write(c.fd, b)
 }
 
+// Close closes the underlying socket for the connection
 func (c *Conn) Close() error {
 	return syscall.Close(c.fd)
 }

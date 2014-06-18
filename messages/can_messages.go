@@ -7,10 +7,10 @@ import (
 )
 
 var idToMessage = map[uint16]CAN{
-	0x501: &MotorDriveCommand{},
-	0x502: &MotorPowerCommand{},
 	0x402: &BusMeasurement{},
 	0x403: &VelocityMeasurement{},
+	0x501: &MotorDriveCommand{},
+	0x502: &MotorPowerCommand{},
 	0x600: &MPPTStatus{id: 0x600, ArrayLocation: "Front Right"},
 	0x601: &MPPTStatus{id: 0x601, ArrayLocation: "Front Left"},
 	0x602: &MPPTStatus{id: 0x602, ArrayLocation: "Back Right"},

@@ -44,7 +44,7 @@ type MPPTEnable struct {
 	Enable bool
 }
 
-func (m MPPTEnable) New() CAN      { return &MPPTEnable{ArrayLocation: m.ArrayLocation} }
+func (m MPPTEnable) New() CAN      { return &MPPTEnable{id: m.id, ArrayLocation: m.ArrayLocation} }
 func (m MPPTEnable) canID() uint16 { return m.id }
 func (m *MPPTEnable) UnmarshalBinary(b []byte) error {
 	if len(b) != 1 {

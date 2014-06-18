@@ -67,7 +67,7 @@ func TestReadCAN(t *testing.T) {
 			data: "bad\xe7beef",
 			want: []msgAndErr{
 				{err: "packet 0x616: payload size 2 != actual size 1: [100]"},
-				{msg: &messages.Unknown{CANID: 0x656, Data: [8]byte{101, 102, 0, 0, 0, 0, 0, 0}}},
+				{msg: &messages.Unknown{ID: 0x656, Data: [8]byte{101, 102, 0, 0, 0, 0, 0, 0}}},
 			},
 		},
 		{

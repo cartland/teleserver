@@ -7,8 +7,8 @@ import (
 
 // The MPPTStatus message is sent from the MPPTs at a regular interval
 type MPPTStatus struct {
-	// id holds the CAN ID of the message
-	id uint16 `json:"-"`
+	// ID holds the CAN ID of the message
+	ID uint16 `json:"-"`
 	// Array location is a human-readable description of the array location.
 	ArrayLocation string
 	// Array voltage ís scaled by 100, or 1 count = 10mV
@@ -21,8 +21,8 @@ type MPPTStatus struct {
 	Temperature uint16
 }
 
-func (m MPPTStatus) New() CAN      { return &MPPTStatus{id: m.id, ArrayLocation: m.ArrayLocation} }
-func (m MPPTStatus) canID() uint16 { return m.id }
+func (m MPPTStatus) New() CAN      { return &MPPTStatus{ID: m.ID, ArrayLocation: m.ArrayLocation} }
+func (m MPPTStatus) canID() uint16 { return m.ID }
 func (m *MPPTStatus) UnmarshalBinary(b []byte) error {
 	if len(b) != 8 {
 		return fmt.Errorf("data is %d bytes, need %d", len(b), 8)
@@ -37,15 +37,15 @@ func (m *MPPTStatus) UnmarshalBinary(b []byte) error {
 // The MPPTEnable message is sent to the MPPTs to turn them on or off
 type MPPTEnable struct {
 	// id holds the CAN ID of the message
-	id uint16 `json:"-"`
+	ID uint16 `json:"-"`
 	// Array location is a human-readable description of the array location
 	ArrayLocation string
 	// The message will either enable or disable the power point trackets
 	Enable bool
 }
 
-func (m MPPTEnable) New() CAN      { return &MPPTEnable{id: m.id, ArrayLocation: m.ArrayLocation} }
-func (m MPPTEnable) canID() uint16 { return m.id }
+func (m MPPTEnable) New() CAN      { return &MPPTEnable{ID: m.ID, ArrayLocation: m.ArrayLocation} }
+func (m MPPTEnable) canID() uint16 { return m.ID }
 func (m *MPPTEnable) UnmarshalBinary(b []byte) error {
 	if len(b) != 1 {
 		return fmt.Errorf("data is %d bytes, need %d", len(b), 1)

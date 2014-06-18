@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Zephyr Solar</title>
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="stylesheet" href="solar.css">
+
+<div class="container">
+  <div class="metric">
+    <h2 id="BusVoltage">None</h2>
+    Battery (V)
+  </div>
+  <div class="metric">
+    <h1 id="VehicleVelocity">None</h1>
+    Speed (MPH)
+  </div>
+  <div class="metric">
+    <h2 id="BusCurrent">None</h2>
+    Current (A)
+  </div>
+</div>
+
+<div class="plot-container">
+  <div id="array-current" class="plot-placeholder"></div>
+</div>
+
+<div class="plot-container">
+  <div id="array-voltage" class="plot-placeholder"></div>
+</div>
+
+<div class="plot-container">
+  <div id="battery-voltage" class="plot-placeholder"></div>
+</div>
+
+<div class="plot-container">
+  <div id="array-voltage" class="plot-placeholder"></div>
+</div>
+
+<script language="javascript" type="text/javascript" src="/flot/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="/flot/jquery.flot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/flot/jquery.flot.time.min.js"></script>
+<script language="javascript" type="text/javascript" src="/common.js"></script>
+<script language="javascript" type="text/javascript" src="solar.js"></script>

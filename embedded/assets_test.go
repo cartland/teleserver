@@ -47,6 +47,7 @@ func TestUpdatedEmbedded(t *testing.T) {
 		wantURL, gotURL := freshServ.URL+f, embedServ.URL+f
 		if want, got := getHTTP(t, wantURL), getHTTP(t, gotURL); want != got {
 			t.Errorf("Embedded file %v does not match expected: got %v, want %v", f, got, want)
+			t.Errorf("Try running 'go-bindata -o embedded/assets.go -pkg embedded public/...'")
 		}
 	}
 }

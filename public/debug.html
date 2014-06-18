@@ -51,9 +51,6 @@ $(function() {
   ws.onmessage = function(e) {
     var data = JSON.parse(e.data);
 
-    if (data.type) {
-      createOrUpdate(data.time, data.type, data.type, data.value);
-    }
     if (data.CAN) {
       for (var key in data.CAN) {
         if (data.CAN.hasOwnProperty(key)) {

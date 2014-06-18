@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -35,58 +34,28 @@ func TestServeJSON(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	b.Cast(&lib.Metric{Type: "foo", Value: 1.0, Time: time.Unix(10, 0)})
-	b.Cast(lib.Metric{Type: "bar", Value: 2.0, Time: time.Unix(30, 0)})
-	b.Cast(&lib.Metric{Type: "foo", Value: 3.0, Time: time.Unix(40, 0)})
+	bus := &messages.BusMeasurement{BusVoltage: 0, BusCurrent: 0.5}
+	b.Cast(messages.CANPlus{bus, messages.GetID(bus), time.Unix(30, 0)})
+	bus = &messages.BusMeasurement{BusVoltage: 1.5, BusCurrent: 3}
+	b.Cast(&messages.CANPlus{bus, messages.GetID(bus), time.Unix(40, 0)})
 	b.Cast(123)
-	m := &messages.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}
-	b.Cast(messages.CANPlus{m, messages.GetID(m), time.Unix(40, 0)})
+	v := &messages.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}
+	b.Cast(messages.CANPlus{v, messages.GetID(v), time.Unix(40, 0)})
 
 	tests := []struct{ path, want string }{
 		{"/badurl", `404 page not found` + "\n"},
 		{"/nil.json", `{"label":"nil","data":null}` + "\n"},
-		{"/foo.json", `{"label":"foo","data":[[10000,1.000000],[40000,3.000000]]}` + "\n"},
-		{"/bar.json", `{"label":"bar","data":[[30000,2.000000]]}` + "\n"},
+		{"/BusVoltage.json", `{"label":"BusVoltage","data":[[30000,0.000000],[40000,1.500000]]}` + "\n"},
+		{"/BusCurrent.json", `{"label":"BusCurrent","data":[[30000,0.500000],[40000,3.000000]]}` + "\n"},
 		{"/MotorVelocity.json", `{"label":"MotorVelocity","data":[[40000,1.000000]]}` + "\n"},
 		{"/VehicleVelocity.json", `{"label":"VehicleVelocity","data":[[40000,2.000000]]}` + "\n"},
-		{"/all.json", `[{"label":"foo","data":[[10000,1.000000],[40000,3.000000]]},{"label":"bar","data":[[30000,2.000000]]},{"label":"MotorVelocity","data":[[40000,1.000000]]},{"label":"VehicleVelocity","data":[[40000,2.000000]]}]` + "\n"},
+		{"/all.json", `[{"label":"BusVoltage","data":[[30000,0.000000],[40000,1.500000]]},{"label":"BusCurrent","data":[[30000,0.500000],[40000,3.000000]]},{"label":"MotorVelocity","data":[[40000,1.000000]]},{"label":"VehicleVelocity","data":[[40000,2.000000]]}]` + "\n"},
 	}
 
 	for _, c := range tests {
 		got := getHTTP(t, ts.URL+c.path)
 		if got != c.want {
 			t.Errorf("%v: got %v, want %v", c.path, got, c.want)
-		}
-	}
-}
-
-func TestReadData(t *testing.T) {
-	testString := `:3.0}
-{"type":"foo","value":1.0}{"type":"bar","value":2.0}
-{"type":"foo","value":3.0}
-`
-	then := time.Now()
-	time.Sleep(time.Millisecond)
-	b := broadcaster.New()
-	defer b.Close()
-	ch := b.Subscribe(nil)
-
-	lib.ReadJSON(strings.NewReader(testString), b)
-
-	expected := []*lib.Metric{{"foo", 1.0, then}, {"bar", 2.0, then}, {"foo", 3.0, then}}
-	for _, e := range expected {
-		got := <-ch
-		m, ok := got.(*lib.Metric)
-		if !ok {
-			t.Errorf("Wrong type %[1]T for %+[1]v", got)
-			continue
-		}
-		now := time.Now()
-		if m.Type != e.Type || m.Value != e.Value {
-			t.Errorf("Wrong metric: got %+v, want %+v", m, e)
-		}
-		if m.Time.Before(then) || m.Time.After(now) {
-			t.Errorf("Time %v should be between 0 and %v", m.Time.Sub(then), now.Sub(then))
 		}
 	}
 }

@@ -27,17 +27,10 @@ const (
 
 var startTime = time.Now()
 
-// Metric represents a json object with the type of metric, the value of the
-// metric, and the timestamp in milliseconds since epoch.
-type Metric struct {
-	Type  string    `json:"type"`
-	Value float64   `json:"value"`
-	Time  time.Time `json:"time"`
-}
-
-func getSpeed() *Metric {
+func getSpeed() messages.CANPlus {
 	t := time.Since(startTime)
-	return &Metric{Type: "VehicleVelocity", Value: 50 + 20*math.Cos(t.Seconds()), Time: time.Now()}
+	v := float32(50 + 20*math.Cos(t.Seconds()))
+	return messages.NewCANPlus(&messages.VelocityMeasurement{VehicleVelocity: v})
 }
 
 func getPower() messages.CANPlus {
@@ -54,26 +47,6 @@ func readTill(r io.Reader, b byte) {
 		if err != nil {
 			log.Fatal(err)
 		}
-	}
-}
-
-// ReadJSON will continually read json from the io.Reader, interpret it as a
-// metric, and send the metric through the broadcaster.
-func ReadJSON(r io.Reader, b broadcaster.Caster) {
-	readTill(r, '\n')
-
-	d := json.NewDecoder(r)
-	for {
-		m := &Metric{}
-		if err := d.Decode(m); err != nil {
-			if err == io.EOF {
-				log.Print("Found EOF, stopping the read")
-				return
-			}
-			log.Fatal("issues reading from reader: ", err)
-		}
-		m.Time = time.Now()
-		b.Cast(m)
 	}
 }
 
@@ -152,13 +125,6 @@ func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 		// Get broadcast data and process it into a map for requests.
 		for d := range dataCh {
 			switch d := d.(type) {
-
-			case Metric, *Metric:
-				m, ok := d.(Metric)
-				if !ok {
-					m = *d.(*Metric)
-				}
-				updateData(m.Type, point{x: m.Time, y: m.Value})
 
 			case messages.CANPlus, *messages.CANPlus:
 				m, ok := d.(messages.CANPlus)

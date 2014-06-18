@@ -70,10 +70,6 @@
             if (data.time) {
                 data.time = (new Date(data.time)).getTime();
             }
-            if (data.type) {
-                $("#" + data.type).text(data.value.toFixed(1));
-                update(data.type, [data.time, data.value]);
-            }
             if (data.CAN) {
                 for (var key in data.CAN) {
                     if (data.CAN.hasOwnProperty(key)) {

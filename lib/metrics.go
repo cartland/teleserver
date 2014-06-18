@@ -40,6 +40,17 @@ func getPower() messages.CANPlus {
 	return messages.NewCANPlus(&messages.BusMeasurement{BusVoltage: v, BusCurrent: a})
 }
 
+func getMPPT(id uint16) messages.CANPlus {
+	t := time.Since(startTime)
+	msg := messages.IDToMessage(id).(*messages.MPPTStatus)
+	fid := float64(id)
+	msg.ArrayVoltage = uint16(5000 + 500*math.Sin(t.Seconds()+fid))
+	msg.ArrayCurrent = uint16(5000 + 500*math.Cos(t.Seconds()+fid))
+	msg.BatteryVoltage = uint16(10000 + 1000*math.Cos(t.Seconds()/2+fid))
+	msg.Temperature = uint16(2500 + 5000*math.Cos(t.Seconds()/3+fid))
+	return messages.NewCANPlus(msg)
+}
+
 // readTill takes bytes from the reader until it sees b.
 func readTill(r io.Reader, b byte) {
 	p := make([]byte, 1)
@@ -55,6 +66,10 @@ func GenFake(b broadcaster.Caster) {
 	for {
 		b.Cast(getSpeed())
 		b.Cast(getPower())
+		b.Cast(getMPPT(0x600))
+		b.Cast(getMPPT(0x601))
+		b.Cast(getMPPT(0x602))
+		b.Cast(getMPPT(0x603))
 		time.Sleep(metricPeriod)
 	}
 }

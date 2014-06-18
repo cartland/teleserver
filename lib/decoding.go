@@ -75,14 +75,8 @@ func newCANFromBytes(b []byte) (messages.CAN, error) {
 	} else if len(body) != length {
 		return nil, fmt.Errorf("packet 0x%x: payload size %d != actual size %d: %v", id, length, len(body), body)
 	}
-	msg, ok := messages.IDToMessage[id]
-	if !ok {
-		msg = &messages.Unknown{CANID: id}
-	}
 
-	// Make a new copy of the message to prevent changing the one in the id map.
-	msg = msg.New()
-
+	msg := messages.IDToMessage(id)
 	if err := msg.UnmarshalBinary(body); err != nil {
 		return nil, fmt.Errorf("packet 0x%x: payload %v: %v", id, body, err)
 	}

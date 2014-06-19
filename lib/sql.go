@@ -10,6 +10,7 @@ import (
 	"github.com/stvnrhodes/broadcaster"
 )
 
+// DB represents an SQL database for the teleserver.
 type DB struct {
 	sql *sql.DB
 }
@@ -51,6 +52,7 @@ func (db DB) WriteMessages(b broadcaster.Caster) {
 	}
 }
 
+// GetLatest returns the most recent message with the given id
 func (db DB) GetLatest(canid uint16) (*msgs.CANPlus, error) {
 	row := db.sql.QueryRow("SELECT MAX(time), data FROM messages WHERE canid = ?", canid)
 	var unixNanos int64
@@ -65,6 +67,8 @@ func (db DB) GetLatest(canid uint16) (*msgs.CANPlus, error) {
 	return &msgs.CANPlus{CAN: msg, CANID: canid, Time: time.Unix(0, unixNanos)}, nil
 }
 
+// GetSince returns all messages with the given id that have happened since the
+// given duration.
 func (db DB) GetSince(d time.Duration, canid uint16) ([]*msgs.CANPlus, error) {
 	t := time.Now().Add(-d).UnixNano()
 	rows, err := db.sql.Query("SELECT time, data FROM messages WHERE canid = ? AND time > ? ORDER BY time", canid, t)

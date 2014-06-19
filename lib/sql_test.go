@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/calsol/teleserver/lib"
 	"github.com/calsol/teleserver/msgs"
@@ -34,11 +35,10 @@ func TestSQLMessages(t *testing.T) {
 		&msgs.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2},
 	}
 
-	msgPlus := []interface{}{
-		msgs.NewCANPlus(raw[0]),
-		msgs.NewCANPlus(raw[1]),
-		msgs.NewCANPlus(raw[2]),
-		123,
+	var msgPlus []*msgs.CANPlus
+	for _, msg := range raw {
+		m := msgs.NewCANPlus(msg)
+		msgPlus = append(msgPlus, &m)
 	}
 
 	for _, m := range msgPlus {
@@ -49,15 +49,24 @@ func TestSQLMessages(t *testing.T) {
 	b.Close()
 	wg.Wait()
 
-	// Only check for the latest
+	// Only check for the latest messages.
 	for _, i := range []int{1, 2} {
 		msg, err := db.GetLatest(msgs.GetID(raw[i]))
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if !reflect.DeepEqual(msgPlus[i], *msg) {
+		if !reflect.DeepEqual(msgPlus[i], msg) {
 			t.Fatalf("%d: got %#v, want %#v", i, msg, msgPlus[i])
 		}
+	}
+
+	multiple, err := db.GetSince(time.Minute, msgs.GetID(raw[0]))
+	if err != nil {
+		t.Fatal(err)
+	}
+	original := []*msgs.CANPlus{msgPlus[0], msgPlus[1]}
+	if !reflect.DeepEqual(multiple, original) {
+		t.Fatalf("got %v, want %v", multiple, original)
 	}
 }

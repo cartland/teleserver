@@ -55,8 +55,7 @@ func (db DB) GetLatest(canid uint16) (*msgs.CANPlus, error) {
 	row := db.sql.QueryRow("SELECT MAX(time), data FROM messages WHERE canid = ?", canid)
 	var unixNanos int64
 	var data []byte
-	err := row.Scan(&unixNanos, &data)
-	if err != nil {
+	if err := row.Scan(&unixNanos, &data); err != nil {
 		return nil, err
 	}
 	msg := msgs.IDToMessage(canid)
@@ -64,4 +63,30 @@ func (db DB) GetLatest(canid uint16) (*msgs.CANPlus, error) {
 		return nil, err
 	}
 	return &msgs.CANPlus{CAN: msg, CANID: canid, Time: time.Unix(0, unixNanos)}, nil
+}
+
+func (db DB) GetSince(d time.Duration, canid uint16) ([]*msgs.CANPlus, error) {
+	t := time.Now().Add(-d).UnixNano()
+	rows, err := db.sql.Query("SELECT time, data FROM messages WHERE canid = ? AND time > ? ORDER BY time", canid, t)
+	msg := msgs.IDToMessage(canid)
+	if err != nil {
+		return nil, err
+	}
+	var results []*msgs.CANPlus
+	for rows.Next() {
+		msg := msg.New()
+		var unixNanos int64
+		var data []byte
+		if err := rows.Scan(&unixNanos, &data); err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(data, msg); err != nil {
+			return nil, err
+		}
+		results = append(results, &msgs.CANPlus{CAN: msg, CANID: canid, Time: time.Unix(0, unixNanos)})
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return results, nil
 }

@@ -24,7 +24,8 @@ func NewDB(db *sql.DB) (*DB, error) {
 	return &DB{db}, nil
 }
 
-func (db DB) writeCAN(c *msgs.CANPlus) error {
+// WriteCAN writes the CAN message to the database.
+func (db DB) WriteCAN(c *msgs.CANPlus) error {
 	data, err := json.Marshal(c.CAN)
 	if err != nil {
 		return err
@@ -42,9 +43,9 @@ func (db DB) WriteMessages(b broadcaster.Caster) {
 		var err error
 		switch msg := msg.(type) {
 		case msgs.CANPlus:
-			err = db.writeCAN(&msg)
+			err = db.WriteCAN(&msg)
 		case *msgs.CANPlus:
-			err = db.writeCAN(msg)
+			err = db.WriteCAN(msg)
 		}
 		if err != nil {
 			log.Println(err)

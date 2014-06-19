@@ -7,27 +7,23 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/calsol/teleserver/msgs"
-	"github.com/gorilla/mux"
-	"github.com/stvnrhodes/broadcaster"
 )
 
 const (
-	// How long to look back for json data
-	// This constant should be kept in sync with public/main.js
-	bufferedTime = 20 * time.Second
+	// Default time to look back for json data
+	bufferedTime = 2 * time.Minute
 )
 
 type point struct {
 	x time.Time
-	y float64
+	y interface{} // This should always be a number
 }
 
 func (p point) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("[%d,%f]", p.x.UnixNano()/1000000, p.y)), nil
+	return []byte(fmt.Sprintf("[%d,%v]", p.x.UnixNano()/1000000, p.y)), nil
 }
 
 // ServeLatest will find the most recent result for a CAN ID in the database
@@ -55,7 +51,9 @@ func ServeLatest(db *DB) func(http.ResponseWriter, *http.Request) {
 		}
 
 		e := json.NewEncoder(w)
-		e.Encode(metrics)
+		if err := e.Encode(metrics); err != nil {
+			log.Printf("Failed to encode json: %v", err)
+		}
 	}
 }
 
@@ -65,103 +63,59 @@ type GraphData struct {
 	Data  []point `json:"data"`
 }
 
-// updateSeries adds p to ps and removes any points from longer ago than oldest.
-func updateSeries(ps []point, p point, oldest time.Duration) []point {
-	now, then := p.x, ps[0].x
-	for len(ps) > 10 && now.Sub(then) > oldest {
-		ps, then = ps[1:], ps[0].x
-		then = ps[0].x
-	}
-	return append(ps, p)
+func hasField(c *msgs.CANPlus, name string) bool {
+	_, ok := reflect.TypeOf(c.CAN).Elem().FieldByName(name)
+	return ok
 }
 
-func updateData(data map[string]GraphData, mu *sync.Mutex, name string, p point) {
-	mu.Lock()
-	defer mu.Unlock()
-	if series, ok := data[name]; ok {
-		series.Data = updateSeries(series.Data, p, bufferedTime)
-		data[name] = series
-	} else {
-		data[name] = GraphData{
-			Label: name,
-			Data:  []point{p},
-		}
-	}
-}
-
-// ServeFlotGraphs remembers broadcast metrics for bufferedTime and serves them
-// up when requested based on the type field. It uses the {name} variable from
-// mux.Vars to determine which data to serve, and will serve all graphs in an
-// array if {name} == "all".
-func ServeFlotGraphs(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
-	var mu sync.Mutex
-	data := make(map[string]GraphData)
-	dataCh := b.Subscribe(nil)
-
-	updateData := func(name string, p point) {
-		mu.Lock()
-		defer mu.Unlock()
-		if series, ok := data[name]; ok {
-			series.Data = updateSeries(series.Data, p, bufferedTime)
-			data[name] = series
-		} else {
-			data[name] = GraphData{
-				Label: name,
-				Data:  []point{p},
-			}
-		}
-	}
-
-	go func() {
-		// Get broadcast data and process it into a map for requests.
-		for d := range dataCh {
-			switch d := d.(type) {
-
-			case msgs.CANPlus, *msgs.CANPlus:
-				m, ok := d.(msgs.CANPlus)
-				if !ok {
-					m = *d.(*msgs.CANPlus)
-				}
-				v := reflect.ValueOf(m.CAN).Elem()
-				t := reflect.TypeOf(m.CAN).Elem()
-				for i := 0; i < t.NumField(); i++ {
-					f := t.Field(i)
-					val := v.FieldByName(f.Name)
-					if k := val.Kind(); k == reflect.Float32 || k == reflect.Float64 {
-						updateData(f.Name, point{x: m.Time, y: val.Float()})
-					}
-				}
-
-			}
-		}
-	}()
-
+// ServeFlotGraphs serves fields from CAN messages as input data to flot graphs.
+func ServeFlotGraphs(db *DB) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		name := mux.Vars(r)["name"]
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		// Use buffered time by default
+		d := bufferedTime
+		if len(r.Form["time"]) > 0 {
+			t, err := time.ParseDuration(r.Form["time"][0])
+			if err == nil {
+				d = t
+			}
+		}
+
+		metrics := [][]*msgs.CANPlus{}
+		for _, id := range r.Form["canid"] {
+			canid, err := strconv.Atoi(id)
+			if err != nil {
+				continue
+			}
+			metric, err := db.GetSince(d, uint16(canid))
+			if err != nil {
+				continue
+			}
+			metrics = append(metrics, metric)
+		}
+
+		s := []GraphData{}
+		for _, field := range r.Form["field"] {
+			for _, metric := range metrics {
+				if len(metric) > 0 && hasField(metric[0], field) {
+					graph := GraphData{Label: fmt.Sprintf("0x%x - %s", metric[0].CANID, field)}
+					for _, m := range metric {
+						graph.Data = append(graph.Data, point{m.Time, reflect.ValueOf(m.CAN).Elem().FieldByName(field).Interface()})
+					}
+					s = append(s, graph)
+				}
+			}
+		}
+
 		e := json.NewEncoder(w)
-		var d interface{}
-		mu.Lock()
-		// Special case "all" to return all the data.
-		if name == "all" {
-			s := []GraphData{}
-			for _, g := range data {
-				s = append(s, g)
-			}
-			d = s
-		} else {
-			// A nonexistant name should 404.
-			if s, ok := data[name]; ok {
-				d = s
-			}
-		}
-		mu.Unlock()
-		if d == nil {
-			w.WriteHeader(http.StatusNotFound)
-			d = GraphData{Label: name}
-		}
-		if err := e.Encode(d); err != nil {
-			log.Print("Failed to send json: ", err)
+		if err := e.Encode(s); err != nil {
+			log.Printf("Failed to encode json: %v", err)
 		}
 	}
 }

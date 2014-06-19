@@ -12,7 +12,6 @@ import (
 	"github.com/calsol/teleserver/lib"
 	"github.com/calsol/teleserver/msgs"
 	"github.com/gorilla/mux"
-	"github.com/stvnrhodes/broadcaster"
 )
 
 func makeDB(t *testing.T) *lib.DB {
@@ -70,35 +69,54 @@ func TestServeLatest(t *testing.T) {
 	}
 }
 
-func TestServeJSON(t *testing.T) {
-	b := broadcaster.New()
-	defer b.Close()
+func TestServeFlot(t *testing.T) {
+
+	db := makeDB(t)
+
+	// TODO(stvn): Test more intersections
+	tm := time.Now()
+	bus := &msgs.BusMeasurement{BusVoltage: 0, BusCurrent: 0.5}
+	db.WriteCAN(&msgs.CANPlus{bus, msgs.GetID(bus), tm.Add(-time.Hour)})
+	bus = &msgs.BusMeasurement{BusVoltage: 1.5, BusCurrent: 3}
+	db.WriteCAN(&msgs.CANPlus{bus, msgs.GetID(bus), tm.Add(-30 * time.Minute)})
+	v := &msgs.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}
+	db.WriteCAN(&msgs.CANPlus{v, msgs.GetID(v), tm.Add(-30 * time.Minute)})
+
 	r := mux.NewRouter()
-	r.HandleFunc("/{name}.json", lib.ServeFlotGraphs(b))
+	r.HandleFunc("/data", lib.ServeFlotGraphs(db))
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	bus := &msgs.BusMeasurement{BusVoltage: 0, BusCurrent: 0.5}
-	b.Cast(msgs.CANPlus{bus, msgs.GetID(bus), time.Unix(30, 0)})
-	bus = &msgs.BusMeasurement{BusVoltage: 1.5, BusCurrent: 3}
-	b.Cast(&msgs.CANPlus{bus, msgs.GetID(bus), time.Unix(40, 0)})
-	b.Cast(123)
-	v := &msgs.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}
-	b.Cast(msgs.CANPlus{v, msgs.GetID(v), time.Unix(40, 0)})
-
 	tests := []struct{ path, want string }{
-		{"/badurl", `404 page not found` + "\n"},
-		{"/nil.json", `{"label":"nil","data":null}` + "\n"},
-		{"/BusVoltage.json", `{"label":"BusVoltage","data":[[30000,0.000000],[40000,1.500000]]}` + "\n"},
-		{"/BusCurrent.json", `{"label":"BusCurrent","data":[[30000,0.500000],[40000,3.000000]]}` + "\n"},
-		{"/MotorVelocity.json", `{"label":"MotorVelocity","data":[[40000,1.000000]]}` + "\n"},
-		{"/VehicleVelocity.json", `{"label":"VehicleVelocity","data":[[40000,2.000000]]}` + "\n"},
-		{"/all.json", `[{"label":"BusVoltage","data":[[30000,0.000000],[40000,1.500000]]},{"label":"BusCurrent","data":[[30000,0.500000],[40000,3.000000]]},{"label":"MotorVelocity","data":[[40000,1.000000]]},{"label":"VehicleVelocity","data":[[40000,2.000000]]}]` + "\n"},
+		{"/data", `[]` + "\n"},
+		{"/data?canid=123", `[]` + "\n"},
+		{fmt.Sprintf("/data?canid=%d&field=BusVoltage", msgs.GetID(bus)), `[]` + "\n"},
+		{
+			fmt.Sprintf("/data?canid=%d&field=BusVoltage&time=45m", msgs.GetID(bus)),
+			`[{"label":"0x402 - BusVoltage","data":[[1403157354184,1.5]]}]` + "\n",
+		},
+		{
+			fmt.Sprintf("/data?canid=%d&field=VehicleVelocity&time=45m", msgs.GetID(v)),
+			`[{"label":"0x403 - VehicleVelocity","data":[[1403157734191,2]]}]` + "\n",
+		},
+		{
+			fmt.Sprintf("/data?canid=%d&canid=%d&time=45m&field=BusVoltage", msgs.GetID(v), msgs.GetID(bus)),
+			`[{"label":"0x402 - BusVoltage","data":[[1403157462723,1.5]]}]` + "\n",
+		},
+		{
+			fmt.Sprintf("/data?canid=%d&time=1h20m&field=BusVoltage", msgs.GetID(bus)),
+			`[{"label":"0x402 - BusVoltage","data":[[1403155825986,0],[1403157625986,1.5]]}]` + "\n",
+		},
+		{
+			fmt.Sprintf("/data?canid=%d&canid=%d&time=45m&field=BusVoltage&field=BusCurrent&field=VehicleVelocity", msgs.GetID(v), msgs.GetID(bus)),
+			`[{"label":"0x402 - BusVoltage","data":[[1403157734191,1.5]]},{"label":"0x402 - BusCurrent","data":[[1403157734191,3]]},{"label":"0x403 - VehicleVelocity","data":[[1403157734191,2]]}]` + "\n",
+		},
 	}
 
 	for _, c := range tests {
 		got := getHTTP(t, ts.URL+c.path)
-		if got != c.want {
+		// We compare lengths to avoid parsing the time.
+		if len(got) != len(c.want) {
 			t.Errorf("%v: got %v, want %v", c.path, got, c.want)
 		}
 	}

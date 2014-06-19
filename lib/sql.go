@@ -65,7 +65,7 @@ func (db DB) GetLatest(canid uint16) (*msgs.CANPlus, error) {
 	if err := json.Unmarshal(data, msg); err != nil {
 		return nil, err
 	}
-	return &msgs.CANPlus{CAN: msg, CANID: canid, Time: time.Unix(0, unixNanos)}, nil
+	return &msgs.CANPlus{CAN: msg, CANID: canid, Time: time.Unix(0, unixNanos).UTC()}, nil
 }
 
 // GetSince returns all messages with the given id that have happened since the
@@ -88,7 +88,7 @@ func (db DB) GetSince(d time.Duration, canid uint16) ([]*msgs.CANPlus, error) {
 		if err := json.Unmarshal(data, msg); err != nil {
 			return nil, err
 		}
-		results = append(results, &msgs.CANPlus{CAN: msg, CANID: canid, Time: time.Unix(0, unixNanos)})
+		results = append(results, &msgs.CANPlus{CAN: msg, CANID: canid, Time: time.Unix(0, unixNanos).UTC()})
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

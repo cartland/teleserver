@@ -52,7 +52,7 @@ func GetID(msg CAN) uint16 {
 
 // NewCANPlus is a convenience function to add extra info to a CAN message.
 func NewCANPlus(msg CAN) CANPlus {
-	return CANPlus{msg, GetID(msg), time.Now()}
+	return CANPlus{msg, GetID(msg), time.Now().UTC()}
 }
 
 type ider interface {

@@ -93,7 +93,8 @@ func main() {
 	// We handle websocket connections and allow fetching limited historical data.
 	r := mux.NewRouter()
 	r.HandleFunc("/ws", lib.ServeWS(b, &websocket.Upgrader{}))
-	r.HandleFunc("/graphs/{name}.json", lib.ServeJSONGraphs(b))
+	r.HandleFunc("/api/graphs", lib.ServeFlotGraphs(b))
+	r.HandleFunc("/api/latest", lib.ServeLatest(db))
 	r.HandleFunc("/send{type}", sendToCAN).Methods("POST")
 
 	// We either serve from embedded so that the binary is standalone, or from

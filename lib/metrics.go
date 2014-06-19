@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"reflect"
+	"strconv"
 	"sync"
 	"time"
 
@@ -83,6 +84,35 @@ func (p point) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("[%d,%f]", p.x.UnixNano()/1000000, p.y)), nil
 }
 
+// ServeLatest will find the most recent result for a CAN ID in the database
+// and return it. ServeLatest can return multiple CAN IDs.
+func ServeLatest(db *DB) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		metrics := []*msgs.CANPlus{}
+		for _, id := range r.Form["canid"] {
+			canid, err := strconv.Atoi(id)
+			if err != nil {
+				continue
+			}
+			metric, err := db.GetLatest(uint16(canid))
+			if err != nil {
+				continue
+			}
+			metrics = append(metrics, metric)
+		}
+
+		e := json.NewEncoder(w)
+		e.Encode(metrics)
+	}
+}
+
 // GraphData represents the data for a flot graph.
 type GraphData struct {
 	Label string  `json:"label"`
@@ -113,11 +143,11 @@ func updateData(data map[string]GraphData, mu *sync.Mutex, name string, p point)
 	}
 }
 
-// ServeJSONGraphs remembers broadcast metrics for bufferedTime and serves them
+// ServeFlotGraphs remembers broadcast metrics for bufferedTime and serves them
 // up when requested based on the type field. It uses the {name} variable from
 // mux.Vars to determine which data to serve, and will serve all graphs in an
 // array if {name} == "all".
-func ServeJSONGraphs(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
+func ServeFlotGraphs(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 	var mu sync.Mutex
 	data := make(map[string]GraphData)
 	dataCh := b.Subscribe(nil)

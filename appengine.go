@@ -13,6 +13,8 @@ import (
 	"github.com/calsol/teleserver/lib"
 	"github.com/gorilla/mux"
 	"github.com/stvnrhodes/broadcaster"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func init() {

@@ -1,7 +1,6 @@
 (function($) {
     // How long to have graph data
-    // This constant should be kept in sync with metrics.go
-    var bufferedTime = 20 * 1000 // 20s * 1000 ms/s
+    var bufferedTime = 1 * 60 * 1000 // 1m * 60s/m * 1000 ms/s
 
     // Create the graph
     var plot = $.plot("#placeholder", [], {
@@ -40,7 +39,7 @@
 
     // Fetch the initial data
     $.ajax({
-        url: "/graphs/all.json",
+        url: "/api/graphs?canid=" + 0x402 + "&field=VehicleVelocity&canid=" + 0x403 + "&field=BusVoltage&field=BusCurrent&time=1m",
         type: "GET",
         dataType: "json",
         success: onJSONFetch
@@ -74,8 +73,10 @@
                 for (var key in data.CAN) {
                     if (data.CAN.hasOwnProperty(key)) {
                         var val = data.CAN[key]
-                        $("#" + key).text(val.toFixed(1));
-                        update(key, [data.time, val]);
+                        if ($("#" + key).length) {
+                            $("#" + key).text(val.toFixed(1));
+                        }
+                        update("0x" + parseInt(data.canID, 10).toString(16) + " - " + key, [data.time, val]);
                     }
                 }
             }

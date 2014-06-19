@@ -40,7 +40,7 @@
 
     // Fetch the initial data
     $.ajax({
-        url: "/data/all.json",
+        url: "/graphs/all.json",
         type: "GET",
         dataType: "json",
         success: onJSONFetch

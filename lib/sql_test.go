@@ -5,10 +5,9 @@ import (
 	"reflect"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/calsol/teleserver/lib"
-	"github.com/calsol/teleserver/messages"
+	"github.com/calsol/teleserver/msgs"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stvnrhodes/broadcaster"
 )
@@ -29,16 +28,16 @@ func TestSQLMessages(t *testing.T) {
 	go func() { wg.Done(); db.WriteMessages(b); wg.Done() }()
 	wg.Wait()
 
-	msgs := []messages.CAN{
-		&messages.BusMeasurement{BusVoltage: 0, BusCurrent: 0.5},
-		&messages.BusMeasurement{BusVoltage: 1.5, BusCurrent: 3},
-		&messages.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2},
+	raw := []msgs.CAN{
+		&msgs.BusMeasurement{BusVoltage: 0, BusCurrent: 0.5},
+		&msgs.BusMeasurement{BusVoltage: 1.5, BusCurrent: 3},
+		&msgs.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2},
 	}
 
 	msgPlus := []interface{}{
-		&messages.CANPlus{msgs[0], messages.GetID(msgs[0]), time.Unix(50, 0)},
-		messages.CANPlus{msgs[1], messages.GetID(msgs[1]), time.Unix(30, 0)},
-		messages.CANPlus{msgs[2], messages.GetID(msgs[2]), time.Unix(40, 0)},
+		msgs.NewCANPlus(raw[0]),
+		msgs.NewCANPlus(raw[1]),
+		msgs.NewCANPlus(raw[2]),
 		123,
 	}
 
@@ -51,12 +50,13 @@ func TestSQLMessages(t *testing.T) {
 	wg.Wait()
 
 	// Only check for the latest
-	for _, i := range []int{0, 2} {
-		msg, err := db.GetLatest(messages.GetID(msgs[i]))
+	for _, i := range []int{1, 2} {
+		msg, err := db.GetLatest(msgs.GetID(raw[i]))
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !reflect.DeepEqual(reflect.Indirect(reflect.ValueOf(msgPlus[i])).Interface(), *msg) {
+
+		if !reflect.DeepEqual(msgPlus[i], *msg) {
 			t.Fatalf("%d: got %#v, want %#v", i, msg, msgPlus[i])
 		}
 	}

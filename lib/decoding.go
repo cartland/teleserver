@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"github.com/calsol/teleserver/can"
-	"github.com/calsol/teleserver/messages"
+	"github.com/calsol/teleserver/msgs"
 	"github.com/stvnrhodes/broadcaster"
 )
 
@@ -61,7 +61,7 @@ func NewXSPScanner(r io.Reader) *bufio.Scanner {
 
 // newCANFromBytes takes the raw bytes of a CAN message and parses it into a
 // semantically useful message.
-func newCANFromBytes(b []byte) (messages.CAN, error) {
+func newCANFromBytes(b []byte) (msgs.CAN, error) {
 	if len(b) < 2 {
 		return nil, fmt.Errorf("message was too short: %v", b)
 	}
@@ -76,7 +76,7 @@ func newCANFromBytes(b []byte) (messages.CAN, error) {
 		return nil, fmt.Errorf("packet 0x%x: payload size %d != actual size %d: %v", id, length, len(body), body)
 	}
 
-	msg := messages.IDToMessage(id)
+	msg := msgs.IDToMessage(id)
 	if err := msg.UnmarshalBinary(body); err != nil {
 		return nil, fmt.Errorf("packet 0x%x: payload %v: %v", id, body, err)
 	}
@@ -86,7 +86,7 @@ func newCANFromBytes(b []byte) (messages.CAN, error) {
 // CANReader is capable of reading CAN messages.
 type CANReader interface {
 	// Read gets the next message from the CANReader
-	Read() (messages.CAN, error)
+	Read() (msgs.CAN, error)
 }
 
 // xspCANReader allows reading CAN messages from a XSP Serial CAN connection.
@@ -100,7 +100,7 @@ type xspCANReader struct {
 func NewXSPCANReader(r io.Reader) CANReader {
 	return &xspCANReader{b: NewXSPScanner(r)}
 }
-func (c *xspCANReader) Read() (messages.CAN, error) {
+func (c *xspCANReader) Read() (msgs.CAN, error) {
 	if c.b.Scan() {
 		return newCANFromBytes(c.b.Bytes())
 	}
@@ -132,7 +132,7 @@ func changeSocketCANEncoding(b []byte) ([]byte, error) {
 // and returns complete messages. The SocketCAN format reads can.FrameSize bytes
 // at a time and interprets them as a complete CAN message.
 func NewSocketCANReader(r io.Reader) CANReader { return socketCANReader{r} }
-func (s socketCANReader) Read() (messages.CAN, error) {
+func (s socketCANReader) Read() (msgs.CAN, error) {
 	b := make([]byte, can.FrameSize)
 	if n, err := s.r.Read(b); err != nil {
 		return nil, err
@@ -155,6 +155,6 @@ func ReadCAN(r CANReader, b broadcaster.Caster) {
 			log.Print(err)
 			continue
 		}
-		b.Cast(messages.NewCANPlus(msg))
+		b.Cast(msgs.NewCANPlus(msg))
 	}
 }

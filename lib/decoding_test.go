@@ -9,7 +9,7 @@ import (
 
 	"github.com/calsol/teleserver/can"
 	"github.com/calsol/teleserver/lib"
-	"github.com/calsol/teleserver/messages"
+	"github.com/calsol/teleserver/msgs"
 )
 
 func TestXSPDecode(t *testing.T) {
@@ -48,7 +48,7 @@ func TestXSPDecode(t *testing.T) {
 }
 
 type msgAndErr struct {
-	msg messages.CAN
+	msg msgs.CAN
 	err string
 }
 
@@ -67,22 +67,22 @@ func TestReadCAN(t *testing.T) {
 			data: "bad\xe7beef",
 			want: []msgAndErr{
 				{err: "packet 0x616: payload size 2 != actual size 1: [100]"},
-				{msg: &messages.Unknown{ID: 0x656, Data: [8]byte{101, 102, 0, 0, 0, 0, 0, 0}}},
+				{msg: &msgs.Unknown{ID: 0x656, Data: [8]byte{101, 102, 0, 0, 0, 0, 0, 0}}},
 			},
 		},
 		{
 			data: "\x18\x50" + "\xcd\xcc\x44\x41\x66\x66\x36\x42",
 			want: []msgAndErr{
-				{msg: &messages.MotorDriveCommand{MotorCurrent: 12.3, MotorVelocity: 45.6}},
+				{msg: &msgs.MotorDriveCommand{MotorCurrent: 12.3, MotorVelocity: 45.6}},
 			},
 		},
 		{
 			data: "\x28\x50" + "\x66\x66\x36\x42\xcd\xcc\x44\x41" + "\xe7bad\xe7" +
 				"\x38\x40" + "\x00\x80\xad\x43\x41\xb1\x2d\x42",
 			want: []msgAndErr{
-				{msg: &messages.MotorPowerCommand{BusCurrent: 12.3}},
+				{msg: &msgs.MotorPowerCommand{BusCurrent: 12.3}},
 				{err: "packet 0x616: payload size 2 != actual size 1: [100]"},
-				{msg: &messages.VelocityMeasurement{MotorVelocity: 347, VehicleVelocity: 43.4231}},
+				{msg: &msgs.VelocityMeasurement{MotorVelocity: 347, VehicleVelocity: 43.4231}},
 			},
 		},
 	}
@@ -134,14 +134,14 @@ func TestReadSocketCAN(t *testing.T) {
 		{
 			data: "\x01\x05\x00\x00" + "\x08" + "\x00\x00\x00" + "\xcd\xcc\x44\x41\x66\x66\x36\x42",
 			want: []msgAndErr{
-				{msg: &messages.MotorDriveCommand{MotorCurrent: 12.3, MotorVelocity: 45.6}},
+				{msg: &msgs.MotorDriveCommand{MotorCurrent: 12.3, MotorVelocity: 45.6}},
 			},
 		},
 		{
 			data: test4Data,
 			want: []msgAndErr{
-				{msg: &messages.MotorPowerCommand{BusCurrent: 12.3}},
-				{msg: &messages.VelocityMeasurement{MotorVelocity: 347, VehicleVelocity: 43.4231}},
+				{msg: &msgs.MotorPowerCommand{BusCurrent: 12.3}},
+				{msg: &msgs.VelocityMeasurement{MotorVelocity: 347, VehicleVelocity: 43.4231}},
 			},
 		},
 	}

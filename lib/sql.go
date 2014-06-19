@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/calsol/teleserver/messages"
+	"github.com/calsol/teleserver/msgs"
 	"github.com/stvnrhodes/broadcaster"
 )
 
@@ -23,7 +23,7 @@ func NewDB(db *sql.DB) (*DB, error) {
 	return &DB{db}, nil
 }
 
-func (db DB) writeCAN(c *messages.CANPlus) error {
+func (db DB) writeCAN(c *msgs.CANPlus) error {
 	data, err := json.Marshal(c.CAN)
 	if err != nil {
 		return err
@@ -40,9 +40,9 @@ func (db DB) WriteMessages(b broadcaster.Caster) {
 	for msg := range b.Subscribe(nil) {
 		var err error
 		switch msg := msg.(type) {
-		case messages.CANPlus:
+		case msgs.CANPlus:
 			err = db.writeCAN(&msg)
-		case *messages.CANPlus:
+		case *msgs.CANPlus:
 			err = db.writeCAN(msg)
 		}
 		if err != nil {
@@ -51,7 +51,7 @@ func (db DB) WriteMessages(b broadcaster.Caster) {
 	}
 }
 
-func (db DB) GetLatest(canid uint16) (*messages.CANPlus, error) {
+func (db DB) GetLatest(canid uint16) (*msgs.CANPlus, error) {
 	row := db.sql.QueryRow("SELECT MAX(time), data FROM messages WHERE canid = ?", canid)
 	var unixNanos int64
 	var data []byte
@@ -59,9 +59,9 @@ func (db DB) GetLatest(canid uint16) (*messages.CANPlus, error) {
 	if err != nil {
 		return nil, err
 	}
-	msg := messages.IDToMessage(canid)
+	msg := msgs.IDToMessage(canid)
 	if err := json.Unmarshal(data, msg); err != nil {
 		return nil, err
 	}
-	return &messages.CANPlus{CAN: msg, CANID: canid, Time: time.Unix(0, unixNanos)}, nil
+	return &msgs.CANPlus{CAN: msg, CANID: canid, Time: time.Unix(0, unixNanos)}, nil
 }

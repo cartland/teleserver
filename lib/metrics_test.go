@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/calsol/teleserver/lib"
-	"github.com/calsol/teleserver/messages"
+	"github.com/calsol/teleserver/msgs"
 	"github.com/gorilla/mux"
 	"github.com/stvnrhodes/broadcaster"
 )
@@ -34,13 +34,13 @@ func TestServeJSON(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	bus := &messages.BusMeasurement{BusVoltage: 0, BusCurrent: 0.5}
-	b.Cast(messages.CANPlus{bus, messages.GetID(bus), time.Unix(30, 0)})
-	bus = &messages.BusMeasurement{BusVoltage: 1.5, BusCurrent: 3}
-	b.Cast(&messages.CANPlus{bus, messages.GetID(bus), time.Unix(40, 0)})
+	bus := &msgs.BusMeasurement{BusVoltage: 0, BusCurrent: 0.5}
+	b.Cast(msgs.CANPlus{bus, msgs.GetID(bus), time.Unix(30, 0)})
+	bus = &msgs.BusMeasurement{BusVoltage: 1.5, BusCurrent: 3}
+	b.Cast(&msgs.CANPlus{bus, msgs.GetID(bus), time.Unix(40, 0)})
 	b.Cast(123)
-	v := &messages.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}
-	b.Cast(messages.CANPlus{v, messages.GetID(v), time.Unix(40, 0)})
+	v := &msgs.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}
+	b.Cast(msgs.CANPlus{v, msgs.GetID(v), time.Unix(40, 0)})
 
 	tests := []struct{ path, want string }{
 		{"/badurl", `404 page not found` + "\n"},

@@ -113,11 +113,11 @@ func updateData(data map[string]GraphData, mu *sync.Mutex, name string, p point)
 	}
 }
 
-// ServeJSON remembers broadcast metrics for bufferedTime and serves them up
-// when requested based on the type field. It uses the {name} variable from
+// ServeJSONGraphs remembers broadcast metrics for bufferedTime and serves them
+// up when requested based on the type field. It uses the {name} variable from
 // mux.Vars to determine which data to serve, and will serve all graphs in an
 // array if {name} == "all".
-func ServeJSON(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
+func ServeJSONGraphs(b broadcaster.Caster) func(http.ResponseWriter, *http.Request) {
 	var mu sync.Mutex
 	data := make(map[string]GraphData)
 	dataCh := b.Subscribe(nil)

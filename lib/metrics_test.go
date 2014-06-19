@@ -30,7 +30,7 @@ func TestServeJSON(t *testing.T) {
 	b := broadcaster.New()
 	defer b.Close()
 	r := mux.NewRouter()
-	r.HandleFunc("/{name}.json", lib.ServeJSON(b))
+	r.HandleFunc("/{name}.json", lib.ServeJSONGraphs(b))
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 

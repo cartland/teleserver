@@ -42,11 +42,11 @@ func getHTTP(t *testing.T, url string) string {
 func TestServeLatest(t *testing.T) {
 	db := makeDB(t)
 	bus := &msgs.BusMeasurement{BusVoltage: 0, BusCurrent: 0.5}
-	db.WriteCAN(&msgs.CANPlus{bus, msgs.GetID(bus), time.Unix(30, 0)})
+	db.WriteCAN(&msgs.CANPlus{bus, msgs.GetID(bus), time.Unix(0, 100000000000000000)})
 	bus = &msgs.BusMeasurement{BusVoltage: 1.5, BusCurrent: 3}
-	db.WriteCAN(&msgs.CANPlus{bus, msgs.GetID(bus), time.Unix(40, 0)})
+	db.WriteCAN(&msgs.CANPlus{bus, msgs.GetID(bus), time.Unix(0, 200000000000000000)})
 	v := &msgs.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2}
-	db.WriteCAN(&msgs.CANPlus{v, msgs.GetID(v), time.Unix(40, 0)})
+	db.WriteCAN(&msgs.CANPlus{v, msgs.GetID(v), time.Unix(0, 200000000000000000)})
 
 	r := mux.NewRouter()
 	r.HandleFunc("/data", lib.ServeLatest(db))
@@ -56,9 +56,9 @@ func TestServeLatest(t *testing.T) {
 	tests := []struct{ path, want string }{
 		{"/data", `[]` + "\n"},
 		{"/data?canid=123", `[]` + "\n"},
-		{fmt.Sprintf("/data?canid=%d", msgs.GetID(bus)), `[{"CAN":{"BusVoltage":1.5,"BusCurrent":3},"canID":1026,"time":"1969-12-31T16:00:40-08:00"}]` + "\n"},
-		{fmt.Sprintf("/data?canid=%d", msgs.GetID(v)), `[{"CAN":{"MotorVelocity":1,"VehicleVelocity":2},"canID":1027,"time":"1969-12-31T16:00:40-08:00"}]` + "\n"},
-		{fmt.Sprintf("/data?canid=%d&canid=%d", msgs.GetID(bus), msgs.GetID(v)), `[{"CAN":{"BusVoltage":1.5,"BusCurrent":3},"canID":1026,"time":"1969-12-31T16:00:40-08:00"},{"CAN":{"MotorVelocity":1,"VehicleVelocity":2},"canID":1027,"time":"1969-12-31T16:00:40-08:00"}]` + "\n"},
+		{fmt.Sprintf("/data?canid=%d", msgs.GetID(bus)), `[{"CAN":{"BusVoltage":1.5,"BusCurrent":3},"canID":1026,"time":"1976-05-03T12:33:20-07:00"}]` + "\n"},
+		{fmt.Sprintf("/data?canid=%d", msgs.GetID(v)), `[{"CAN":{"MotorVelocity":1,"VehicleVelocity":2},"canID":1027,"time":"1976-05-03T12:33:20-07:00"}]` + "\n"},
+		{fmt.Sprintf("/data?canid=%d&canid=%d", msgs.GetID(bus), msgs.GetID(v)), `[{"CAN":{"BusVoltage":1.5,"BusCurrent":3},"canID":1026,"time":"1976-05-03T12:33:20-07:00"},{"CAN":{"MotorVelocity":1,"VehicleVelocity":2},"canID":1027,"time":"1976-05-03T12:33:20-07:00"}]` + "\n"},
 	}
 
 	for _, c := range tests {

@@ -18,7 +18,6 @@ class PostJson(webapp2.RequestHandler):
     signature = self.requests.get('signature')
     data = self.request.get('data')
     m = hashlib.sha256()
-    m.update(data)
     secret = Secret.all().fetch(1)[0].secret
     m.update(data)
     m.update(secret)

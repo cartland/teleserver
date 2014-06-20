@@ -16,30 +16,31 @@
         plot.draw();
     }
     // Populate the graph with initial data
-    function onJSONFetch(allSeries) {
-        for (var i = 0; i < allSeries.length; i++) {
-            series = allSeries[i]
-            if (!fetched[series.label]) {
-                fetched[series.label] = true;
-                data[series.label] = series;
-            }
-        }
+    function onCurrentFetch(allSeries) {
+        // for (var i = 0; i < allSeries.length; i++) {
+        //     series = allSeries[i]
+        //     if (!fetched[series.label]) {
+        //         fetched[series.label] = true;
+        //         data[series.label] = series;
+        //     }
+        // }
         dataArray = allSeries
-        refreshPlot()
+        refreshPlot(arrayCurrentPlot)
     }
 
     // Fetch the initial data
     $.ajax({
-        url: "/data/all.json",
+        url: "/api/graphs?canid=" + [0x600, 0x601, 0x602, 0x603].join("&canid=") + "&field=ArrayCurrent",
         type: "GET",
         dataType: "json",
-        success: onJSONFetch
+        success: onCurrentFetch
     });
 
     $(function() {
 
         // Update the graph with the given point
         function update(name, point) {
+            name = "0x" + parseInt(data.canID, 10).toString(16) + " - " + name
             if (fetched[name]) {
                 series = data[name].data;
                 series.push(point);
@@ -48,7 +49,7 @@
                 }
 
                 // TODO(stvn): Support multiple graphs
-                refreshPlot(plot)
+                refreshPlot(arrayCurrentPlot)
             }
         }
 
@@ -61,7 +62,7 @@
                 data.time = (new Date(data.time)).getTime();
             }
             if (data.canID >= 0x600 && data.canID <= 0x604) {
-                update(data.CAN.ArrayLocation, [data.time, val]);
+                update(data.CAN.ArrayLocation, [data.time, data.CAN]);
             }
         }
     });

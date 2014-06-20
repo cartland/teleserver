@@ -41,10 +41,12 @@ func ServeLatest(db *DB) func(http.ResponseWriter, *http.Request) {
 		for _, id := range r.Form["canid"] {
 			canid, err := strconv.Atoi(id)
 			if err != nil {
+				log.Println(err)
 				continue
 			}
 			metric, err := db.GetLatest(uint16(canid))
 			if err != nil {
+				log.Println(err)
 				continue
 			}
 			metrics = append(metrics, metric)
@@ -91,10 +93,12 @@ func ServeFlotGraphs(db *DB) func(http.ResponseWriter, *http.Request) {
 		for _, id := range r.Form["canid"] {
 			canid, err := strconv.Atoi(id)
 			if err != nil {
+				log.Println(err)
 				continue
 			}
 			metric, err := db.GetSince(d, uint16(canid))
 			if err != nil {
+				log.Println(err)
 				continue
 			}
 			metrics = append(metrics, metric)

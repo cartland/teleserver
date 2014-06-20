@@ -18,12 +18,18 @@ import (
 
 var totallyFakeSecretKey = []byte("123")
 
-func TestSendMessage(t *testing.T) {
-	db := makeDB(t)
-	i := lib.NewImporter(db, totallyFakeSecretKey)
+func makeServer(t *testing.T, db *lib.DB) *httptest.Server {
+	b := broadcaster.New()
+	go db.WriteMessages(b)
+	i := lib.NewImporter(b, totallyFakeSecretKey)
 	r := mux.NewRouter()
 	r.Handle("/", i)
-	ts := httptest.NewServer(r)
+	return httptest.NewServer(r)
+}
+
+func TestSendMessage(t *testing.T) {
+	db := makeDB(t)
+	ts := makeServer(t, db)
 	defer ts.Close()
 
 	b := broadcaster.New()

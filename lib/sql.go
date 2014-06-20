@@ -24,27 +24,17 @@ func NewDB(db *sql.DB) (*DB, error) {
 	return &DB{db}, nil
 }
 
-// WriteMessage writes a message with the given timestamp and id to the database
-func (db DB) WriteMessage(t time.Time, id uint16, data []byte) error {
-	// Since this is a public function, we'll validate the data to make sure it's
-	// properly formed.
-	if err := json.Unmarshal(data, &struct{}{}); err != nil {
-		return err
-	}
-	_, err := db.sql.Exec(
-		"INSERT INTO messages (time, canid, data) VALUES (?, ?, ?)",
-		t.UnixNano(), id, string(data),
-	)
-	return err
-}
-
 // WriteCAN writes the CAN message to the database.
 func (db DB) WriteCAN(c *msgs.CANPlus) error {
 	data, err := json.Marshal(c.CAN)
 	if err != nil {
 		return err
 	}
-	return db.WriteMessage(c.Time, c.CANID, data)
+	_, err = db.sql.Exec(
+		"INSERT INTO messages (time, canid, data) VALUES (?, ?, ?)",
+		c.Time.UnixNano(), c.CANID, string(data),
+	)
+	return err
 }
 
 // WriteMessages logs the broadcasted date as JSON to the database.

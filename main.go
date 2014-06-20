@@ -90,7 +90,7 @@ func main() {
 		go lib.ReadCAN(lib.NewSocketCANReader(c), b)
 	} else {
 		// Listen for connections
-		r.Handle("/api/remote", lib.NewImporter(db, []byte(*secret))).Methods("POST")
+		r.Handle("/api/remote", lib.NewImporter(b, []byte(*secret))).Methods("POST")
 	}
 
 	// We handle websocket connections and allow fetching limited historical data.

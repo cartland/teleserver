@@ -12,17 +12,18 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/calsol/teleserver/msgs"
 	"github.com/stvnrhodes/broadcaster"
 )
 
 // Importer accepts messages with the proper key and puts them into the database
 type Importer struct {
-	db     *DB
+	b      broadcaster.Caster
 	secret []byte
 }
 
-func NewImporter(db *DB, secret []byte) Importer {
-	return Importer{db: db, secret: secret}
+func NewImporter(b broadcaster.Caster, secret []byte) Importer {
+	return Importer{b: b, secret: secret}
 }
 
 func (i Importer) writeToDB(data string) error {
@@ -31,13 +32,18 @@ func (i Importer) writeToDB(data string) error {
 		return err
 	}
 
-	id, ok := parsed["canID"].(float64)
+	floatID, ok := parsed["canID"].(float64)
 	if !ok {
 		return errors.New("Missing canID")
 	}
+	id := uint16(floatID)
 
 	b, err := json.Marshal(parsed["CAN"])
 	if err != nil {
+		return err
+	}
+	msg := msgs.IDToMessage(id)
+	if err := json.Unmarshal(b, msg); err != nil {
 		return err
 	}
 
@@ -50,7 +56,8 @@ func (i Importer) writeToDB(data string) error {
 		return err
 	}
 
-	return i.db.WriteMessage(t, uint16(id), b)
+	i.b.Cast(msgs.CANPlus{Time: t, CANID: id, CAN: msg})
+	return nil
 }
 
 func (i Importer) ServeHTTP(w http.ResponseWriter, r *http.Request) {

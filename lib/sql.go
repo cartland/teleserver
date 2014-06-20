@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/calsol/teleserver/msgs"
@@ -14,6 +15,7 @@ import (
 
 // DB represents an SQL database for the teleserver.
 type DB struct {
+	mu  sync.RWMutex
 	sql *sql.DB
 }
 
@@ -23,15 +25,17 @@ func NewDB(db *sql.DB) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &DB{db}, nil
+	return &DB{sql: db}, nil
 }
 
 // WriteCAN writes the CAN message to the database.
-func (db DB) WriteCAN(c *msgs.CANPlus) error {
+func (db *DB) WriteCAN(c *msgs.CANPlus) error {
 	data, err := json.Marshal(c.CAN)
 	if err != nil {
 		return err
 	}
+	db.mu.Lock()
+	defer db.mu.Unlock()
 	_, err = db.sql.Exec(
 		"INSERT INTO messages (time, canid, data) VALUES (?, ?, ?)",
 		c.Time.UnixNano(), c.CANID, string(data),
@@ -40,7 +44,7 @@ func (db DB) WriteCAN(c *msgs.CANPlus) error {
 }
 
 // WriteMessages logs the broadcasted date as JSON to the database.
-func (db DB) WriteMessages(b broadcaster.Caster) {
+func (db *DB) WriteMessages(b broadcaster.Caster) {
 	for msg := range b.Subscribe(nil) {
 		var err error
 		switch msg := msg.(type) {
@@ -56,7 +60,9 @@ func (db DB) WriteMessages(b broadcaster.Caster) {
 }
 
 // GetLatest returns the most recent message with the given id
-func (db DB) GetLatest(canid uint16) (*msgs.CANPlus, error) {
+func (db *DB) GetLatest(canid uint16) (*msgs.CANPlus, error) {
+	db.mu.RLock()
+	defer db.mu.RUnlock()
 	row := db.sql.QueryRow("SELECT MAX(time), data FROM messages WHERE canid = ?", canid)
 	var unixNanos int64
 	var data []byte
@@ -72,8 +78,10 @@ func (db DB) GetLatest(canid uint16) (*msgs.CANPlus, error) {
 
 // GetSince returns all messages with the given id that have happened since the
 // given duration.
-func (db DB) GetSince(d time.Duration, canid uint16) ([]*msgs.CANPlus, error) {
+func (db *DB) GetSince(d time.Duration, canid uint16) ([]*msgs.CANPlus, error) {
 	t := time.Now().Add(-d).UnixNano()
+	db.mu.RLock()
+	defer db.mu.RUnlock()
 	rows, err := db.sql.Query("SELECT time, data FROM messages WHERE canid = ? AND time > ? ORDER BY time", canid, t)
 	msg := msgs.IDToMessage(canid)
 	if err != nil {

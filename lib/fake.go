@@ -12,7 +12,7 @@ import (
 
 const (
 	// Time between fake data readings
-	metricPeriod = 500 * time.Millisecond
+	metricPeriod = 200 * time.Millisecond
 )
 
 var startTime = time.Now()

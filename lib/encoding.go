@@ -58,7 +58,7 @@ func frameFromForm(dataType string, r *http.Request) (*can.Frame, error) {
 
 // HandleSendToCAN generates a http handler that sends valid requests over the
 // SocketCAN connection.
-func HandleSendToCAN(c *can.Conn) func(w http.ResponseWriter, r *http.Request) {
+func HandleSendToCAN(c can.Conn) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {

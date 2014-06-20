@@ -3,38 +3,31 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"path"
-
-	"go/build"
 
 	"github.com/calsol/teleserver/embedded"
 	"github.com/calsol/teleserver/lib"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/stvnrhodes/broadcaster"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func init() {
+	// db, err := lib.NewDB("")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	// All data is distributed to all web connections,
 	b := broadcaster.New()
 
-	// We handle websocket connections and allow fetching limited historical data.
 	r := mux.NewRouter()
-	r.HandleFunc("/data/{name}.json", lib.ServeJSON(b))
+	r.HandleFunc("/ws", lib.ServeWS(b, &websocket.Upgrader{}))
+	// r.HandleFunc("/api/graphs", lib.ServeFlotGraphs(db))
+	// r.HandleFunc("/api/latest", lib.ServeLatest(db))
 
-	// We either serve from embedded so that the binary is standalone, or from
-	// /public for rapid development and live changes.
-	p, err := build.Default.Import(embedded.BasePkg, "", build.FindOnly)
-	if err != nil {
-		log.Fatalf("Couldn't find resource files: %v", err)
-	}
-	root := path.Join(p.Dir, "public")
-	log.Println("Serving content from", root)
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir(root)))
+	r.PathPrefix("/").HandlerFunc(embedded.ServeFiles)
 
 	http.Handle("/", r)
 }

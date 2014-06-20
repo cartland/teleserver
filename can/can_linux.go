@@ -10,9 +10,11 @@ CONFIG_CAN_VCAN=m
 */
 
 import (
+	"bytes"
 	"encoding/binary"
 	"log"
 	"reflect"
+	"sync"
 	"syscall"
 )
 
@@ -48,7 +50,7 @@ type ifReq struct {
 // that holds a lock when reading or writing. Do not try opening the same
 // connection twice or reusing a closed connection, there's nothing to protect
 // you.
-func Dial(ifname string) (*Conn, error) {
+func Dial(ifname string) (Conn, error) {
 	fd, err := syscall.Socket(syscall.AF_CAN, syscall.SOCK_RAW, CAN_RAW)
 	if err != nil {
 		log.Println("Failed to open socket")
@@ -71,7 +73,7 @@ func Dial(ifname string) (*Conn, error) {
 		return nil, err
 	}
 
-	return &Conn{ifname: ifname, fd: fd}, nil
+	return &conn{ifname: ifname, fd: fd}, nil
 }
 
 func ptrAndSize(n interface{}) (ptr, size uintptr) {
@@ -98,4 +100,58 @@ func bind(fd int, sockAddr interface{}) error {
 	ptr, size := ptrAndSize(sockAddr)
 	_, _, errno := syscall.Syscall(syscall.SYS_BIND, uintptr(fd), ptr, size)
 	return toErr(errno)
+}
+
+// conn holds a connection to the CAN socket.
+type conn struct {
+	ifname    string
+	fd        int
+	readLock  sync.Mutex
+	writeLock sync.Mutex
+	buf       bytes.Buffer
+}
+
+// ReadFrame reads an entire CAN frame at once and returns it. It's recommended
+// to use this instead of Read.
+func (c *conn) ReadFrame() (*Frame, error) {
+	var f Frame
+	if err := binary.Read(c, binary.LittleEndian, &f); err != nil {
+		return nil, err
+	}
+	return &f, nil
+}
+
+// WriteFrame writes an entire CAN frame at once. It's recommended to use this
+// instead of Write.
+func (c *conn) WriteFrame(f *Frame) error {
+	return binary.Write(c, binary.LittleEndian, f)
+}
+
+// Read reads bytes from the CAN socket. When reading, you should pass in a
+// slice at least 16 bytes long to fit an entire frame.
+func (c *conn) Read(b []byte) (int, error) {
+	c.readLock.Lock()
+	defer c.readLock.Unlock()
+	if c.buf.Len() == 0 {
+		buf := make([]byte, 16)
+		n, err := syscall.Read(c.fd, buf)
+		if err != nil {
+			return 0, err
+		}
+		c.buf.Write(buf[:n])
+	}
+	return c.buf.Read(b)
+}
+
+// Write writes bytes to the CAN socket. When writing, an entire CAN frame should
+// be passed in at a time.
+func (c *conn) Write(b []byte) (int, error) {
+	c.writeLock.Lock()
+	defer c.writeLock.Unlock()
+	return syscall.Write(c.fd, b)
+}
+
+// Close closes the underlying socket for the connection
+func (c *conn) Close() error {
+	return syscall.Close(c.fd)
 }

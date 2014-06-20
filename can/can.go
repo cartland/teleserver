@@ -1,12 +1,6 @@
 package can
 
-import (
-	"bytes"
-	"encoding/binary"
-	"reflect"
-	"sync"
-	"syscall"
-)
+import "reflect"
 
 const (
 	// special address description flags for the CAN_ID
@@ -43,55 +37,19 @@ func NewFrame(id uint32, data []byte) *Frame {
 }
 
 // Conn holds a connection to the CAN socket.
-type Conn struct {
-	ifname    string
-	fd        int
-	readLock  sync.Mutex
-	writeLock sync.Mutex
-	buf       bytes.Buffer
-}
-
-// ReadFrame reads an entire CAN frame at once and returns it. It's recommended
-// to use this instead of Read.
-func (c *Conn) ReadFrame() (*Frame, error) {
-	var f Frame
-	if err := binary.Read(c, binary.LittleEndian, &f); err != nil {
-		return nil, err
-	}
-	return &f, nil
-}
-
-// WriteFrame writes an entire CAN frame at once. It's recommended to use this
-// instead of Write.
-func (c *Conn) WriteFrame(f *Frame) error {
-	return binary.Write(c, binary.LittleEndian, f)
-}
-
-// Read reads bytes from the CAN socket. When reading, you should pass in a
-// slice at least 16 bytes long to fit an entire frame.
-func (c *Conn) Read(b []byte) (int, error) {
-	c.readLock.Lock()
-	defer c.readLock.Unlock()
-	if c.buf.Len() == 0 {
-		buf := make([]byte, 16)
-		n, err := syscall.Read(c.fd, buf)
-		if err != nil {
-			return 0, err
-		}
-		c.buf.Write(buf[:n])
-	}
-	return c.buf.Read(b)
-}
-
-// Conn writes bytes to the CAN socket. When writing, an entire CAN frame should
-// be passed in at a time.
-func (c *Conn) Write(b []byte) (int, error) {
-	c.writeLock.Lock()
-	defer c.writeLock.Unlock()
-	return syscall.Write(c.fd, b)
-}
-
-// Close closes the underlying socket for the connection
-func (c *Conn) Close() error {
-	return syscall.Close(c.fd)
+type Conn interface {
+	// ReadFrame reads an entire CAN frame at once and returns it. It's recommended
+	// to use this instead of Read.
+	ReadFrame() (*Frame, error)
+	// WriteFrame writes an entire CAN frame at once. It's recommended to use this
+	// instead of Write.
+	WriteFrame(f *Frame) error
+	// Read reads bytes from the CAN socket. When reading, you should pass in a
+	// slice at least 16 bytes long to fit an entire frame.
+	Read(b []byte) (int, error)
+	// Write writes bytes to the CAN socket. When writing, an entire CAN frame should
+	// be passed in at a time.
+	Write(b []byte) (int, error)
+	// Close closes the underlying socket for the connection
+	Close() error
 }

@@ -24,13 +24,13 @@ func writer(ws *websocket.Conn, ch <-chan interface{}) {
 		case m := <-ch:
 			ws.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := ws.WriteJSON(m); err != nil {
-				log.Println("Disconnected from client: ", err)
+				// Logging errors here is too spammy, since it happens on page refresh.
 				return
 			}
 		case <-pingTicker.C:
 			ws.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-				log.Println("Disconnected from client: ", err)
+				log.Println(err)
 				return
 			}
 		}

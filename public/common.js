@@ -17,7 +17,7 @@ var plotDefaults = {
 }
 
 var getNum = function(str) {
-    var i = parseInt(str);
+    var i = parseFloat(str);
     return isNaN(i) ? 0 : i;
 }
 

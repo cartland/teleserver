@@ -16,6 +16,11 @@ var plotDefaults = {
     }
 }
 
+var getNum = function(str) {
+    var i = parseInt(str);
+    return isNaN(i) ? 0 : i;
+}
+
 var tooltip = function() {
     function showTooltip(x, y, contents) {
         $('<div id="tooltip">' + contents + '</div>').css({

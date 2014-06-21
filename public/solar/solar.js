@@ -15,11 +15,12 @@
         function() {
             for (var i = 0; i < metrics.length; i++) {
                 var plotname = metrics[i];
-                if (plots[plotname] && dataArrays[plotname])
+                if (plots[plotname] && dataArrays[plotname]) {
                     var plot = plots[plotname];
-                plot.setData(dataArrays[plotname]);
-                plot.setupGrid();
-                plot.draw();
+                    plot.setData(dataArrays[plotname]);
+                    plot.setupGrid();
+                    plot.draw();
+                }
             }
         }, 200);
 
@@ -55,11 +56,12 @@
             if (data.time) {
                 data.time = (new Date(data.time));
             }
-            if (data.CAN) {
-                // Update any graphs that match.
+            if (data.CAN && data.canID >= 0x600 && data.canID < 0x620) {
+                // Update any graphs and ids that match.
                 for (var i = 0; i < metrics.length; i++) {
                     var metric = metrics[i]
                     var name = "0x" + parseInt(data.canID, 10).toString(16) + " - " + metric
+                    $("#" + data.CAN.ArrayLocation + metric).text(data.CAN[metric])
                     if (data.CAN[metric] && plotData[name]) {
                         var series = plotData[name];
                         var time = data.time.getTime()
@@ -70,6 +72,13 @@
                         // refreshPlot(metric)
                     }
                 }
+
+                // Update the total current from the array
+                var sum = 0;
+                $('.ArrayCurrentVal').each(function() {
+                    sum += getNum($(this).text());
+                });
+                $("#total").text(sum);
             }
 
         };

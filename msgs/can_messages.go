@@ -11,14 +11,14 @@ var idToMessage = map[uint16]CAN{
 	0x403: &VelocityMeasurement{},
 	0x501: &MotorDriveCommand{},
 	0x502: &MotorPowerCommand{},
-	0x600: &MPPTStatus{ID: 0x600, ArrayLocation: "Front Right"},
-	0x601: &MPPTStatus{ID: 0x601, ArrayLocation: "Front Left"},
-	0x602: &MPPTStatus{ID: 0x602, ArrayLocation: "Back Right"},
-	0x603: &MPPTStatus{ID: 0x603, ArrayLocation: "Back Left"},
-	0x610: &MPPTEnable{ID: 0x610, ArrayLocation: "Front Right"},
-	0x611: &MPPTEnable{ID: 0x611, ArrayLocation: "Front Left"},
-	0x612: &MPPTEnable{ID: 0x612, ArrayLocation: "Back Right"},
-	0x613: &MPPTEnable{ID: 0x613, ArrayLocation: "Back Left"},
+	0x600: &MPPTStatus{ID: 0x600, ArrayLocation: "FrontRight"},
+	0x601: &MPPTStatus{ID: 0x601, ArrayLocation: "FrontLeft"},
+	0x602: &MPPTStatus{ID: 0x602, ArrayLocation: "BackRight"},
+	0x603: &MPPTStatus{ID: 0x603, ArrayLocation: "BackLeft"},
+	0x610: &MPPTEnable{ID: 0x610, ArrayLocation: "FrontRight"},
+	0x611: &MPPTEnable{ID: 0x611, ArrayLocation: "FrontLeft"},
+	0x612: &MPPTEnable{ID: 0x612, ArrayLocation: "BackRight"},
+	0x613: &MPPTEnable{ID: 0x613, ArrayLocation: "BackLeft"},
 }
 
 // IDToMessage provides a mapping from message ids to message types.

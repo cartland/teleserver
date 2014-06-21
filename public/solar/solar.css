@@ -2,20 +2,13 @@
   text-align: center;
   margin: auto;
 }
-.metric h1 {
-  font-size: 5em;
-  margin: .2em 0;
-}
-.metric h2 {
-  font-size: 2em;
-  margin: .2em 0;
-}
-.metric {
-  display: inline-block;
-  width: 150px;
-  height: 100px;
-  margin: 1em;
+.powertable, td, th {
   text-align: center;
+  margin: auto;
+  border: 1px solid black;
+}
+.powertable {
+  width:100%;
 }
 
 .plot-container {

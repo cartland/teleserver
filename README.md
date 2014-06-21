@@ -6,7 +6,8 @@ This is a prototype of a telemetry server for a solar car, capable of displaying
 a simplified dashboard on a phone or a more complete dashboard on a laptop or
 tablet.
 
-At minimum you must supply `-fake`, `-serial`, or `-can_addr` as a data source.
+At minimum you'll want `-fake`, `-serial`, or `-can_addr` as a data source.
+Setting `-sqlite` to a filename is needed if you want to read the data later.
 
 ## Installation
 1. Install the most recent version of go from http://golang.org/doc/install

@@ -4,36 +4,57 @@
     var bufferedTime = 20 * 1000 // 20s * 1000 ms/s
 
     // Create the graphs
-    var arrayCurrentPlot = $.plot("#array-current", [], plotDefaults);
+    var plots = {
+        "array-voltage": $.plot("#array-voltage", [], plotDefaults),
+        "array-current": $.plot("#array-current", [], plotDefaults),
+        "battery-voltage": $.plot("#battery-voltage", [], plotDefaults),
+        "temperature": $.plot("#temperature", [], plotDefaults),
+    }
 
     var data = {}, fetched = {};
-    var dataArray = [];
+    var dataArray = {};
     $("#array-current").bind("plothover", tooltip());
 
-    function refreshPlot(plot) {
-        plot.setData(dataArray);
+    function refreshPlot(plotname) {
+        var plot = plots[plotname];
+        debugger;
+        plot.setData(dataArray[plotname]);
         plot.setupGrid();
         plot.draw();
     }
     // Populate the graph with initial data
-    function onCurrentFetch(allSeries) {
-        // for (var i = 0; i < allSeries.length; i++) {
-        //     series = allSeries[i]
-        //     if (!fetched[series.label]) {
-        //         fetched[series.label] = true;
-        //         data[series.label] = series;
-        //     }
-        // }
-        dataArray = allSeries
-        refreshPlot(arrayCurrentPlot)
+    function onFetch(plotname) {
+        return function(allSeries) {
+            dataArray[plotname] = allSeries
+            refreshPlot(plotname)
+        }
     }
 
     // Fetch the initial data
+    var canids = [0x600, 0x601, 0x602, 0x603].join("&canid=")
     $.ajax({
-        url: "/api/graphs?canid=" + [0x600, 0x601, 0x602, 0x603].join("&canid=") + "&field=ArrayCurrent",
+        url: "/api/graphs?canid=" + canids + "&field=ArrayCurrent",
         type: "GET",
         dataType: "json",
-        success: onCurrentFetch
+        success: onFetch("array-current"),
+    });
+    $.ajax({
+        url: "/api/graphs?canid=" + canids + "&field=ArrayVoltage",
+        type: "GET",
+        dataType: "json",
+        success: onFetch("array-voltage"),
+    });
+    $.ajax({
+        url: "/api/graphs?canid=" + canids + "&field=BatteryVoltage",
+        type: "GET",
+        dataType: "json",
+        success: onFetch("battery-voltage"),
+    });
+    $.ajax({
+        url: "/api/graphs?canid=" + canids + "&field=Temperature",
+        type: "GET",
+        dataType: "json",
+        success: onFetch("temperature"),
     });
 
     $(function() {
@@ -49,7 +70,7 @@
                 }
 
                 // TODO(stvn): Support multiple graphs
-                refreshPlot(arrayCurrentPlot)
+                refreshPlot(plots["temperature"])
             }
         }
 

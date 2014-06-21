@@ -18,11 +18,6 @@
   text-align: center;
 }
 
-*{
-  border:1px solid red;
-}
-
-
 .plot-container {
   display: inline-block;
   vertical-align: top;

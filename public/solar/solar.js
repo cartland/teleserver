@@ -1,7 +1,6 @@
 (function($) {
     // How long to have graph data
-    // This constant should be kept in sync with metrics.go
-    var bufferedTime = 2 * 60 * 1000 // 2m * 60s/m * 1000 ms/s
+    var bufferedTime = 60 * 1000 // 20s * 1000 ms/s
 
     // These metrics must match up with both the graph html ids and the json field
     // names.
@@ -9,6 +8,13 @@
     // Create maps to hold the plots, the data for each plot, and the data for each line
     var plots = {}, dataArrays = {}, plotData = {};
 
+    // Start following again if we're looking into the future
+    function checkFuture(e, plot) {
+        var time = (new Date()).getTime()
+        if (time < plot.getOptions().xaxes[0].max) {
+            plot.getOptions().xaxes[0].max = null;
+        }
+    }
 
     // Refresh the plots 5 times a second.
     window.setInterval(
@@ -17,12 +23,25 @@
                 var plotname = metrics[i];
                 if (plots[plotname] && dataArrays[plotname]) {
                     var plot = plots[plotname];
-                    plot.setData(dataArrays[plotname]);
+                    var array = dataArrays[plotname]
+                    var time = (new Date()).getTime();
+                    var min = time;
+
+                    plot.setData(array);
+                    for (var j = 0; j < array.length; j++) {
+                        if (array[j].data[0][0] < min) {
+                            min = array[j].data[0][0];
+                        }
+                    }
+                    if (min > plot.getOptions().xaxes[0].min) {
+                        plot.getOptions().xaxes[0].min = null;
+                    }
+                    plot.getOptions().xaxes[0].panRange = [time - bufferedTime, time + 1000];
                     plot.setupGrid();
                     plot.draw();
                 }
             }
-        }, 200);
+        }, 250);
 
     // Populate the initial values of the plots by getting historical data from
     // ajax queries. Also fill in the dataArrays and plotData with this initial
@@ -31,10 +50,15 @@
     for (var i = 0; i < metrics.length; i++) {
         (function() {
             var metric = metrics[i];
-            plots[metric] = $.plot("#" + metric, [], plotDefaults);
+            var time = (new Date()).getTime();
+            var plot = $.plot("#" + metric, [], plotDefaults);
             $("#" + metric).bind("plothover", tooltip());
+            $("#" + metric).bind("plotpan", checkFuture);
+            $("#" + metric).bind("plotzoom", checkFuture);
+            plot.getOptions().xaxes[0].panRange[0] = time - bufferedTime;
+            plots[metric] = plot
             $.ajax({
-                url: "/api/graphs?time=2m&canid=" + canids + "&field=" + metric,
+                url: "/api/graphs?time=1m&canid=" + canids + "&field=" + metric,
                 type: "GET",
                 dataType: "json",
                 success: function(points) {

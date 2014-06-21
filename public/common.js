@@ -12,8 +12,20 @@ var plotDefaults = {
     xaxis: {
         mode: "time",
         timeformat: "%H:%M:%S",
-        timezone: "browser"
-    }
+        timezone: "browser",
+        zoomRange: [null, null],
+        panRange: [null, null],
+    },
+    yaxis: {
+        zoomRange: false,
+        panRange: false,
+    },
+    zoom: {
+        interactive: true
+    },
+    pan: {
+        interactive: true
+    },
 }
 
 var getNum = function(str) {

@@ -1,7 +1,7 @@
 (function($) {
     // How long to have graph data
     // This constant should be kept in sync with metrics.go
-    var bufferedTime = 20 * 1000 // 20s * 1000 ms/s
+    var bufferedTime = 2 * 60 * 1000 // 2m * 60s/m * 1000 ms/s
 
     // These metrics must match up with both the graph html ids and the json field
     // names.
@@ -34,7 +34,7 @@
             plots[metric] = $.plot("#" + metric, [], plotDefaults);
             $("#" + metric).bind("plothover", tooltip());
             $.ajax({
-                url: "/api/graphs?time=20s&canid=" + canids + "&field=" + metric,
+                url: "/api/graphs?time=2m&canid=" + canids + "&field=" + metric,
                 type: "GET",
                 dataType: "json",
                 success: function(points) {
@@ -69,7 +69,6 @@
                         while (series.length > 1 && time - series[0][0] > bufferedTime) {
                             series.shift();
                         }
-                        // refreshPlot(metric)
                     }
                 }
 

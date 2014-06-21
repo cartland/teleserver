@@ -35,7 +35,7 @@ func getMPPT(id uint16) msgs.CANPlus {
 	msg.ArrayVoltage = uint16(5000 + 500*math.Sin(t.Seconds()/20+fid))
 	msg.ArrayCurrent = uint16(5000 + 500*math.Cos(t.Seconds()/25+fid))
 	msg.BatteryVoltage = uint16(10000 + 1000*math.Cos(t.Seconds()/2+fid))
-	msg.Temperature = uint16(2500 + 5000*math.Cos(t.Seconds()/3+fid))
+	msg.Temperature = uint16(2500 + 500*math.Cos(t.Seconds()/3+fid))
 	return msgs.NewCANPlus(msg)
 }
 

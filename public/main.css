@@ -23,7 +23,7 @@ body {
 }
 
 @media screen and (max-width: 849px) {
-  .plot-placeholder nav {
+  .plot-placeholder, nav {
     display:none;
   }
 }

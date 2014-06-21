@@ -1,8 +1,6 @@
 package lib
 
 import (
-	"io"
-	"log"
 	"math"
 	"time"
 
@@ -39,16 +37,6 @@ func getMPPT(id uint16) msgs.CANPlus {
 	msg.BatteryVoltage = uint16(10000 + 1000*math.Cos(t.Seconds()/2+fid))
 	msg.Temperature = uint16(2500 + 5000*math.Cos(t.Seconds()/3+fid))
 	return msgs.NewCANPlus(msg)
-}
-
-// readTill takes bytes from the reader until it sees b.
-func readTill(r io.Reader, b byte) {
-	p := make([]byte, 1)
-	for _, err := r.Read(p); p[0] != b; _, err = r.Read(p) {
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 }
 
 // GenFake broadcasts fake data for speed, voltage, and power.

@@ -21,13 +21,13 @@ func TestMessageIDs(t *testing.T) {
 			msg := msgs.IDToMessage(0x600)
 			msg.UnmarshalBinary([]byte{0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0})
 			return msg
-		}(), &msgs.MPPTStatus{0x600, "Front Right", 0x3412, 0x7856, 0xbc9a, 0xf0de}, 0x600},
+		}(), &msgs.MPPTStatus{0x600, "FrontRight", 0x3412, 0x7856, 0xbc9a, 0xf0de}, 0x600},
 
 		{func() msgs.CAN {
 			msg := msgs.IDToMessage(0x611)
 			msg.UnmarshalBinary([]byte{0x01})
 			return msg
-		}(), &msgs.MPPTEnable{0x611, "Front Left", true}, 0x611},
+		}(), &msgs.MPPTEnable{0x611, "FrontLeft", true}, 0x611},
 	} {
 		if !reflect.DeepEqual(c.msg, c.want) {
 			t.Errorf("%d: got %#v, want %#v", i, c.msg, c.want)

@@ -1,7 +1,6 @@
 package msgs
 
 import (
-	"encoding"
 	"reflect"
 	"time"
 )
@@ -32,7 +31,6 @@ func IDToMessage(id uint16) CAN {
 
 // CAN describes the data stored inside messages from the CAN bus.
 type CAN interface {
-	encoding.BinaryUnmarshaler
 	// New will create a new message, preserving id and other meta information.
 	New() CAN
 }
@@ -68,13 +66,16 @@ type CANPlus struct {
 
 // Unknown is used if no id is recognized.
 type Unknown struct {
-	ID   uint16 `json:"-"`
-	Data [8]byte
+	ID   uint16  `json:"-"`
+	Data [8]byte `binpack:"0-8"`
 }
 
 func (u Unknown) New() CAN      { return &Unknown{ID: u.ID} }
 func (u Unknown) canID() uint16 { return u.ID }
-func (u *Unknown) UnmarshalBinary(b []byte) error {
+
+// We have a special function for Unknown so that it can deal with messages of
+// multiple lengths.
+func (u *Unknown) UnmarshalBinpack(b []byte) error {
 	copy(u.Data[:], b)
 	return nil
 }

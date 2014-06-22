@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 
+	"github.com/calsol/teleserver/binpack"
 	"github.com/calsol/teleserver/can"
 	"github.com/calsol/teleserver/msgs"
 	"github.com/stvnrhodes/broadcaster"
@@ -77,7 +78,7 @@ func newCANFromBytes(b []byte) (msgs.CAN, error) {
 	}
 
 	msg := msgs.IDToMessage(id)
-	if err := msg.UnmarshalBinary(body); err != nil {
+	if err := binpack.Unmarshal(body, msg); err != nil {
 		return nil, fmt.Errorf("packet 0x%x: payload %v: %v", id, body, err)
 	}
 	return msg, nil

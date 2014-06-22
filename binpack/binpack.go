@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -28,8 +29,8 @@ func binpackSize(v reflect.Value) int {
 		f := t.Field(i)
 		if tag := f.Tag.Get(tagname); tag != "" {
 			if bytes := strings.Split(tag, "."); len(bytes) > 1 {
-				if s, err := strconv.Atoi(bytes[len(bytes)-1]); err == nil && s > size {
-					size = s
+				if s, err := strconv.Atoi(bytes[0]); err == nil && s+1 > size {
+					size = s + 1
 				}
 			}
 			bytes := strings.Split(tag, "-")
@@ -68,7 +69,12 @@ func Unmarshal(data []byte, v interface{}) error {
 
 type decoder struct{ data []byte }
 
-func (d *decoder) value(v reflect.Value) error {
+func (d *decoder) value(v reflect.Value) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%v", err)
+		}
+	}()
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
@@ -88,6 +94,7 @@ func (d *decoder) decodeTag(v reflect.Value, tag string) error {
 	} else if n, err := fmt.Sscanf(tag, "%d-%d", &start, &end); n > 0 && err == nil {
 		return binary.Read(bytes.NewReader(d.data[start:end]), binary.LittleEndian, field)
 	} else if n, err := fmt.Sscanf(tag, "%d.%d", &start, &end); n > 0 && err == nil {
+		log.Print(start, end, d.data)
 		v.SetBool(d.data[start]&(1<<end) != 0)
 	}
 	return nil

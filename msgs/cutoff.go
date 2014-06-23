@@ -16,18 +16,18 @@ type CutoffTrigger struct {
 func (CutoffTrigger) New() CAN { return &CutoffTrigger{} }
 
 type CutoffAnalogIn struct {
-	Ain0 int16 `binpack:"0-2"`
-	Ain1 int16 `binpack:"2-4"`
-	Ain2 int16 `binpack:"4-6"`
-	Ain3 int16 `binpack:"6-8"`
+	Ain0 int16
+	Ain1 int16
+	Ain2 int16
+	Ain3 int16
 }
 
 func (CutoffAnalogIn) New() CAN { return &CutoffAnalogIn{} }
 
 type CutoffSPIIn struct {
-	Ain0 int16 `binpack:"0-2"`
-	Ain1 int16 `binpack:"2-4"`
-	Ain2 int16 `binpack:"4-6"`
+	Ain0 int16
+	Ain1 int16
+	Ain2 int16
 }
 
 func (CutoffSPIIn) New() CAN { return &CutoffSPIIn{} }

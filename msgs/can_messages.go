@@ -6,6 +6,10 @@ import (
 )
 
 var idToMessage = map[uint16]CAN{
+	0x041: &CutoffHeartbeat{},
+	0x260: &CutoffTrigger{},
+	0x261: &CutoffAnalogIn{},
+	0x262: &CutoffSPIIn{},
 	0x402: &BusMeasurement{},
 	0x403: &VelocityMeasurement{},
 	0x501: &MotorDriveCommand{},

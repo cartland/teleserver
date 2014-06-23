@@ -1,7 +1,3 @@
-body {
-  background: black;
-  color: white;
-}
 .container {
   text-align: center;
   margin: auto;
@@ -23,6 +19,10 @@ body {
 }
 
 @media screen and (max-width: 849px) {
+  body {
+    background: black;
+    color: white;
+  }
   .plot-placeholder, nav {
     display:none;
   }

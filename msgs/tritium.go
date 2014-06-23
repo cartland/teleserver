@@ -6,9 +6,9 @@ package msgs
 // placing the system into neutral.
 type MotorDriveCommand struct {
 	// Desired motor current set point as a percentage of maximum current setting.
-	MotorCurrent float32 `binpack:"0-4"`
+	MotorCurrent float32
 	// Desired motor velocity set point in metres/second
-	MotorVelocity float32 `binpack:"4-8"`
+	MotorVelocity float32
 }
 
 func (MotorDriveCommand) New() CAN { return &MotorDriveCommand{} }
@@ -23,18 +23,18 @@ func (MotorPowerCommand) New() CAN { return &MotorPowerCommand{} }
 
 type BusMeasurement struct {
 	// DC Bus voltage at the controller.
-	BusVoltage float32 `binpack:"0-4"`
+	BusVoltage float32
 	// Current drawn from the DC bus by the controller.
-	BusCurrent float32 `binpack:"4-8"`
+	BusCurrent float32
 }
 
 func (BusMeasurement) New() CAN { return &BusMeasurement{} }
 
 type VelocityMeasurement struct {
 	// Motor angular frequency in revolutions per minute.
-	MotorVelocity float32 `binpack:"0-4"`
+	MotorVelocity float32
 	// Vehicle velocity in metres / second.
-	VehicleVelocity float32 `binpack:"4-8"`
+	VehicleVelocity float32
 }
 
 func (VelocityMeasurement) New() CAN { return &VelocityMeasurement{} }

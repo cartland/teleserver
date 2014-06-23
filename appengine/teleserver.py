@@ -1,5 +1,6 @@
 import webapp2
 import hashlib
+import json
 
 from google.appengine.ext import ndb
 
@@ -29,7 +30,6 @@ class SecretPage(webapp2.RequestHandler):
     return self.post()
 
 
-
 class PostJson(webapp2.RequestHandler):
   def post(self):
     # Check HMAC signature.
@@ -57,7 +57,17 @@ class PostJson(webapp2.RequestHandler):
     return self.post()
 
 
+class FetchData(webapp2.RequestHandler):
+  def get(self):
+    limit = self.request.get('limit', 10)
+    result = []
+    for data in DataModel.query().order(-DataModel.created).fetch(limit):
+      result.append(data.data)
+    self.response.write(json.dumps(result))
+
+
 app = webapp2.WSGIApplication([
     ('/admin/secret', SecretPage),
+    ('/fetch_data', FetchData),
     ('/post', PostJson),
 ], debug=True)

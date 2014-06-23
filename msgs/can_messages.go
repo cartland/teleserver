@@ -6,6 +6,7 @@ import (
 )
 
 var idToMessage = map[uint16]CAN{
+	0x042: &BatteryHeartbeat{},
 	0x041: &CutoffHeartbeat{},
 	0x130: &BatteryModule{ID: 0x130},
 	0x131: &BatteryModule{ID: 0x131},

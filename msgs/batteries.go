@@ -1,5 +1,11 @@
 package msgs
 
+type BatteryHeartbeat struct {
+	Time uint16
+}
+
+func (BatteryHeartbeat) New() CAN { return &BatteryHeartbeat{} }
+
 type BatteryModule struct {
 	ID       uint16
 	Voltage0 uint16 `binpack:"0-4"`

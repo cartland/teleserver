@@ -7,6 +7,18 @@ import (
 
 var idToMessage = map[uint16]CAN{
 	0x041: &CutoffHeartbeat{},
+	0x130: &BatteryModule{ID: 0x130},
+	0x131: &BatteryModule{ID: 0x131},
+	0x132: &BatteryModule{ID: 0x132},
+	0x133: &BatteryModule{ID: 0x133},
+	0x140: &BatteryModule{ID: 0x140},
+	0x141: &BatteryModule{ID: 0x141},
+	0x142: &BatteryModule{ID: 0x142},
+	0x143: &BatteryModule{ID: 0x143},
+	0x150: &BatteryModule{ID: 0x150},
+	0x151: &BatteryModule{ID: 0x151},
+	0x152: &BatteryModule{ID: 0x152},
+	0x153: &BatteryModule{ID: 0x153},
 	0x260: &CutoffTrigger{},
 	0x261: &CutoffAnalogIn{},
 	0x262: &CutoffSPIIn{},

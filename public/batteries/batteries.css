@@ -14,7 +14,7 @@
 .plot-container {
   display: inline-block;
   vertical-align: top;
-  width: 49%;
+  width: 100%;
 }
 
 .plot-placeholder {

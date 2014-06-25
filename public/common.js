@@ -33,6 +33,19 @@ var getNum = function(str) {
     return isNaN(i) ? 0 : i;
 }
 
+var parseDuration = function(str) {
+    var milliseconds = 0;
+    var minutes = str.match(/(\d+)\s*m/);
+    var seconds = str.match(/(\d+)\s*s/);
+    if (minutes) {
+        milliseconds += parseInt(minutes[1]) * 60 * 1000;
+    }
+    if (seconds) {
+        milliseconds += parseInt(seconds[1]) * 1000;
+    }
+    return milliseconds;
+}
+
 var tooltip = function() {
     function showTooltip(x, y, contents) {
         $('<div id="tooltip">' + contents + '</div>').css({

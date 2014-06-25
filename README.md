@@ -22,12 +22,6 @@ After changing any files in the /public directory, be sure to run
 
 To install go-bindata, run `go get github.com/jteeuwen/go-bindata/...`
 
-### Tips and tricks
-1. Check out /debug.html for a table of all message types as they come in.
-2. Similarly, /dump.html will spit out each message recieved from the server.
-3. If using SocketCAN, /sendcan.html allows you to send messages one at a time.
-4. `go test github.com/calsol/teleserver/...` helps verify code correctness.
-
 ### Flags
 * `-port`: Port for the webserver. Default is 8080.
 * `-serial`: Port for the serial uart connection.
@@ -45,9 +39,9 @@ To install go-bindata, run `go get github.com/jteeuwen/go-bindata/...`
 * /api/latest?canid=1536&canid=1537 will give you the latest values for messages
   with ids 1536 and 1536 (0x600 and 0x601 in hex)
 * /api/graphs?canid=1536&field=ArrayVoltage&time=3m will give you a graph in
-  flot format for the ArrayVoltage field of messages with a canid of 0x600.
-  Using multiple can ids or multiple fields will give the intersection of
-  everything that matches.
+  flot format for the ArrayVoltage field of messages with a canid of 0x600 in
+  the last 3 minutes. Using multiple can ids or multiple fields will give the
+  intersection of everything that matches.
 
 ### Documentation
 Documentation for most of the functionality: [![GoDoc](https://godoc.org/github.com/CalSol/teleserver/lib?status.png)](https://godoc.org/github.com/CalSol/teleserver/lib)

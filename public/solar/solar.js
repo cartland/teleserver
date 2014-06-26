@@ -1,7 +1,10 @@
 (function($) {
     // How long to have graph data
     var bufferedTime = "2m"
-    var bufferedMillis = parseDuration(bufferedTime)
+    if (window.location.hash) {
+        bufferedTime = window.location.hash.slice(1);
+    }
+    var bufferedMillis = parseDuration(bufferedTime);
 
     // These metrics must match up with both the graph html ids and the json field
     // names.
@@ -35,21 +38,24 @@
             var plot = $.plot("#" + metric, [], plotDefaults);
             $("#" + metric).bind("plothover", tooltip());
             plot.getOptions().xaxes[0].panRange[0] = time - bufferedMillis;
-            plots[metric] = plot
-            $.ajax({
-                url: "/api/graphs?time=" + bufferedTime + "&canid=" + canids + "&field=" + metric,
-                type: "GET",
-                dataType: "json",
-                success: function(points) {
-                    for (var i = 0; i < points.length; i++) {
-                        plotData[points[i].label] = points[i].data
-                    }
-                    dataArrays[metric] = points
-                    // refreshPlot(metric)
-                },
+            plots[metric] = plot;
+            $(window).on("hashchange", function() {
+                bufferedTime = window.location.hash.slice(1);
+                $.ajax({
+                    url: "/api/graphs?time=" + bufferedTime + "&canid=" + canids + "&field=" + metric,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(points) {
+                        for (var i = 0; i < points.length; i++) {
+                            plotData[points[i].label] = points[i].data
+                        }
+                        dataArrays[metric] = points
+                    },
+                });
             });
         })();
     }
+    $(window).trigger("hashchange")
 
     $(function() {
         var ws = new WebSocket("ws://" + window.location.host + "/ws");

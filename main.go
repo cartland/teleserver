@@ -24,6 +24,8 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.Ldate | log.Lmicroseconds | log.Lshortfile)
+
 	port := flag.Int("port", 8080, "Port for the webserver")
 	uart := flag.String("serial", "", "Serial port for talking to the car")
 	baud := flag.Int("baud", 115200, "Baud rate for the serial port")

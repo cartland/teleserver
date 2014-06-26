@@ -70,3 +70,22 @@ func TestSQLMessages(t *testing.T) {
 		t.Fatalf("got %v, want %v", multiple, original)
 	}
 }
+
+func BenchmarkSQL(b *testing.B) {
+	s, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		b.Fatal(err)
+	}
+	db, err := lib.NewDB(s)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	for i := 0; i < 10000; i++ {
+		msg := msgs.NewCANPlus(&msgs.VelocityMeasurement{MotorVelocity: 1, VehicleVelocity: 2})
+		db.WriteCAN(&msg)
+	}
+	for i := 0; i < b.N; i++ {
+		db.GetSince(1*time.Minute, 0x403)
+	}
+}

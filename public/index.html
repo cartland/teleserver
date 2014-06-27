@@ -2,12 +2,13 @@
 <html>
 
 <head>
-  <title>unquote</title>
+  <title>Zephyr</title>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <script src="/bower_components/platform/platform.js"></script>
   <link rel="import" href="/bower_components/font-roboto/roboto.html">
   <link rel="import" href="/bower_components/core-header-panel/core-header-panel.html">
   <link rel="import" href="/bower_components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="/bower_components/paper-slider/paper-slider.html">
   <link rel="import" href="/bower_components/paper-tabs/paper-tabs.html">
   <link rel="import" href="/bower_components/core-icons/core-icons.html">
   <link rel="import" href="/bower_components/core-icons/iconsets/image-icons.html">
@@ -92,7 +93,11 @@
         <paper-tab name="batt"><core-icon icon="image:flash-on" size="32"></core-icon>BATT</paper-tab>
       </paper-tabs>
     </core-toolbar>
-    <div class="container" layout vertical center>
+    <div class="container" id="home-container" layout vertical center>
+      <div class="right-slider" center horizontal layout>
+        <div>Timescale (s)</div>
+        <paper-slider pin snaps min="10" max="600" value="120"></paper-slider>
+      </div>
       <table-card>
         <div class="metric-container">
           <div class="metric">
@@ -116,6 +121,14 @@
         </div>
       </graph-card>
     </div>
+
+    <div layout vertical center>
+      <div>
+        <a href="/debug.html">debug.html</a> |
+        <a href="/dump.html">dump.html</a> |
+        <a href="/sendcan.html">sendcan.html</a>
+      </div>
+    </div>
   </core-header-panel>
   <script language="javascript" type="text/javascript" src="/flot/jquery.min.js"></script>
   <script language="javascript" type="text/javascript" src="/flot/jquery.flot.min.js"></script>
@@ -125,12 +138,10 @@
   <script>
     var tabs = document.querySelector('paper-tabs');
 
-    $(function(){
-      if (!window.location.hash) {
-        window.location.hash = "home"
-      }
-      tabs.selected = window.location.hash.slice(1)
-    });
+    if (!window.location.hash) {
+      window.location.hash = "home"
+    }
+    tabs.selected = window.location.hash.slice(1)
 
     tabs.addEventListener('core-select', function() {
       window.location.hash = tabs.selected;

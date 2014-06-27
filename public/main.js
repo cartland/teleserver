@@ -2,22 +2,18 @@
     // How long to have graph data
     var bufferedTime = 1 * 60 * 1000 // 1m * 60s/m * 1000 ms/s
 
-    // Create the graph
-    var plot = $.plot("#placeholder", [], {
-        legend: {
-            show: true
-        },
-        series: {
-            shadowSize: 0 // Drawing is faster without shadows
-        },
-        xaxis: {
-            mode: "time",
-            timeformat: "%H:%M:%S",
-            timezone: "browser"
-        }
-    });
     var data = {}, fetched = {};
     var dataArray = [];
+
+    // Create the graph
+    var plot
+    makePlot = function() {
+        plot = $.plot($("#placeholder"), dataArray, plotDefaults);
+    }
+    makePlot()
+    $(window).resize(makePlot);
+    window.setTimeout(makePlot, 1);
+    $("#placeholder").bind("plothover", tooltip());
 
     function refreshPlot() {
         plot.setData(dataArray);

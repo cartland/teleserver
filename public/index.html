@@ -1,42 +1,141 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<meta name=viewport content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="mobile-web-app-capable" content="yes">
-<title>Zephyr Dash</title>
-<link rel="shortcut icon" href="/favicon.ico" />
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/main.css">
+<!doctype html>
+<html>
 
-<nav>
-  Main |
-  <a href="/solar">Solar</a> |
-  <a href="/batteries">Batteries</a> |
-  <a href="/dashboard">Dashboard</a> |
-  <a href="/debug.html">Debug</a> |
-  <a href="/dump.html">Dump</a> |
-  <a href="/sendcan.html">Send CAN</a>
-</nav>
+<head>
+  <title>unquote</title>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="/bower_components/platform/platform.js"></script>
+  <link rel="import" href="/bower_components/font-roboto/roboto.html">
+  <link rel="import" href="/bower_components/core-header-panel/core-header-panel.html">
+  <link rel="import" href="/bower_components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="/bower_components/paper-tabs/paper-tabs.html">
+  <link rel="import" href="/bower_components/core-icons/core-icons.html">
+  <link rel="import" href="/bower_components/core-icons/iconsets/image-icons.html">
+  <link rel="import" href="/bower_components/core-icons/iconsets/maps-icons.html">
+  <link rel="import" href="/graph-card.html">
+  <link rel="import" href="/table-card.html">
+  <style>
+  html,body {
+    height: 100%;
+    margin: 0;
+    background-color: #FDB515;
+    font-family: 'Roboto', sans-serif;
+  }
+  core-header-panel {
+    height: 100%;
+  }
+  core-toolbar {
+    background: #003262;
+    color: white;
+  }
+  paper-tabs core-icon {
+    fill: #FDB515;
+  }
+  paper-tabs {
+    width: 100%;
+  }
+  paper-tab::shadow #ink {
+      color: #B9D3B6;
+  }
+  .container {
+    width: 80%;
+    margin: 50px auto;
+  }
+  .metric-container {
+    text-align: center;
+    margin: auto;
+  }
+  .metric h1 {
+    font-size: 5em;
+    margin: .2em 0;
+  }
+  .metric h2 {
+    font-size: 2em;
+    margin: .2em 0;
+  }
+  .metric {
+    display: inline-block;
+    width: 150px;
+    height: 100px;
+    margin: 1em;
+    text-align: center;
+  }
+  table-card {
+    margin-bottom: 30px;
+  }
+  graph-card {
+    margin-bottom: 30px;
+  }
+  @media (min-width: 481px) {
+    paper-tabs {
+      width: 400px;
+    }
+    .container {
+      width: 90%;
+    }
+  }
+  .plot-placeholder {
+      height: 450px;
+      width: 95%;
+    margin: auto;
+  }
+</style>
+</head>
 
-<div class="container">
-  <div class="metric">
-    <h2 id="BusVoltage">None</h2>
-    Battery (V)
-  </div>
-  <div class="metric">
-    <h1 id="VehicleVelocity">None</h1>
-    Speed (MPH)
-  </div>
-  <div class="metric">
-    <h2 id="BusCurrent">None</h2>
-    Current (A)
-  </div>
-</div>
+<body unresolved>
+  <core-header-panel>
+    <core-toolbar>
+      <paper-tabs valueattr="name" self-end>
+        <paper-tab name="home"><core-icon icon="home" size="32"></core-icon>HOME</paper-tab>
+        <paper-tab name="solar"><core-icon icon="image:wb-sunny" size="32"></core-icon>SOLAR</paper-tab>
+        <paper-tab name="dash"><core-icon icon="maps:directions-car" size="32"></core-icon>DASH</paper-tab>
+        <paper-tab name="batt"><core-icon icon="image:flash-on" size="32"></core-icon>BATT</paper-tab>
+      </paper-tabs>
+    </core-toolbar>
+    <div class="container" layout vertical center>
+      <table-card>
+        <div class="metric-container">
+          <div class="metric">
+            <h2 id="BusVoltage">None</h2>
+            Battery (V)
+          </div>
+          <div class="metric">
+            <h1 id="VehicleVelocity">None</h1>
+            Speed (MPH)
+          </div>
+          <div class="metric">
+            <h2 id="BusCurrent">None</h2>
+            Current (A)
+          </div>
+        </div>
+      </table-card>
+      <graph-card>
+        <h2>Speed</h2>
+        <div class="plot-container">
+          <div id="placeholder" class="plot-placeholder"></div>
+        </div>
+      </graph-card>
+    </div>
+  </core-header-panel>
+  <script language="javascript" type="text/javascript" src="/flot/jquery.min.js"></script>
+  <script language="javascript" type="text/javascript" src="/flot/jquery.flot.min.js"></script>
+  <script language="javascript" type="text/javascript" src="/flot/jquery.flot.time.min.js"></script>
+  <script language="javascript" type="text/javascript" src="/common.js"></script>
+  <script language="javascript" type="text/javascript" src="/main.js"></script>
+  <script>
+    var tabs = document.querySelector('paper-tabs');
 
-<div class="plot-container">
-  <div id="placeholder" class="plot-placeholder"></div>
-</div>
+    $(function(){
+      if (!window.location.hash) {
+        window.location.hash = "home"
+      }
+      tabs.selected = window.location.hash.slice(1)
+    });
 
-<script language="javascript" type="text/javascript" src="/flot/jquery.min.js"></script>
-<script language="javascript" type="text/javascript" src="/flot/jquery.flot.min.js"></script>
-<script language="javascript" type="text/javascript" src="/flot/jquery.flot.time.min.js"></script>
-<script language="javascript" type="text/javascript" src="/main.js"></script>
+    tabs.addEventListener('core-select', function() {
+      window.location.hash = tabs.selected;
+    });
+  </script>
+</body>
+
+</html>

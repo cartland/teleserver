@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name=viewport content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Zephyr Dash</title>
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/main.css">
+
+<nav>
+  Main |
+  <a href="/solar">Solar</a> |
+  <a href="/batteries">Batteries</a> |
+  <a href="/dashboard">Dashboard</a> |
+  <a href="/debug.html">Debug</a> |
+  <a href="/dump.html">Dump</a> |
+  <a href="/sendcan.html">Send CAN</a>
+</nav>
+
+<div class="container">
+  <div class="metric">
+    <h2 id="BusVoltage">None</h2>
+    Battery (V)
+  </div>
+  <div class="metric">
+    <h1 id="VehicleVelocity">None</h1>
+    Speed (MPH)
+  </div>
+  <div class="metric">
+    <h2 id="BusCurrent">None</h2>
+    Current (A)
+  </div>
+</div>
+
+<div class="plot-container">
+  <div id="placeholder" class="plot-placeholder"></div>
+</div>
+
+<script language="javascript" type="text/javascript" src="/flot/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="/flot/jquery.flot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/flot/jquery.flot.time.min.js"></script>
+<script language="javascript" type="text/javascript" src="/common.js"></script>
+<script language="javascript" type="text/javascript" src="/main.js"></script>

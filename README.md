@@ -17,7 +17,7 @@ Setting `-sqlite` to a filename is needed if you want to read the data later.
 5. Navigate to http://localhost:8080
 
 After changing any files in the /public directory, be sure to run
- `go-bindata -o embedded/assets.go -ignore \\.bower\.json -pkg embedded public/...`.
+ `go-bindata -o embedded/assets.go -ignore \\.bower\.json -ignore bower_components/marked -ignore bower_components/core-scroll-header-panel/demos -ignore bower_components/core-tests -pkg embedded public/...`.
   This will update the resources embedded in the the binary.
 
 To install go-bindata, run `go get github.com/jteeuwen/go-bindata/...`

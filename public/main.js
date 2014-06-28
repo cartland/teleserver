@@ -74,6 +74,11 @@
                 [0x602, 'Temperature', 'Back Right Array Temperature'],
                 [0x603, 'Temperature', 'Back Left Array Temperature']
             ],
+            'dash-graph': [
+                [0x402, 'BusVoltage', 'Voltage'],
+                [0x402, 'BusCurrent', 'Current'],
+                [0x403, 'VehicleVelocity', 'Velocity']
+            ],
             'battery-cells-graph-low': [
                 [0x130, 'Voltage0', 'Cell 00'],
                 [0x130, 'Voltage1', 'Cell 01'],

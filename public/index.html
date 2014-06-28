@@ -91,6 +91,14 @@
       width: 90%;
     }
   }
+  @media (max-width: 481px) {
+    .container {
+      width: 90%;
+    }
+    .powertable, .powertable td, .powertable th {
+      font-size:90%;
+    }
+  }
   .plot-placeholder {
       height: 450px;
       width: 95%;
@@ -134,7 +142,7 @@
         <graph-card>
           <h2>Speed</h2>
           <div class="plot-container">
-            <div id="placeholder" class="plot-placeholder"></div>
+            <div id="home-graph" class="plot-placeholder"></div>
           </div>
         </graph-card>
       </div>
@@ -143,7 +151,7 @@
         <table-card>
           <table class="powertable">
             <tr>
-            <th>Total Current: <span id="total">0</span></th>
+            <th>Total Current: <span id="array-current-total">0</span></th>
               <th>Front Right Array (0x600)</th>
               <th>Front Left Array (0x601)</th>
               <th>Back Right Array (0x602)</th>
@@ -158,10 +166,10 @@
             </tr>
             <tr>
               <td>Array Current</td>
-              <td class="ArrayCurrentVal" id="0x600ArrayCurrent"></td>
-              <td class="ArrayCurrentVal" id="0x601ArrayCurrent"></td>
-              <td class="ArrayCurrentVal" id="0x602ArrayCurrent"></td>
-              <td class="ArrayCurrentVal" id="0x603ArrayCurrent"></td>
+              <td class="array-current-val" id="0x600ArrayCurrent"></td>
+              <td class="array-current-val" id="0x601ArrayCurrent"></td>
+              <td class="array-current-val" id="0x602ArrayCurrent"></td>
+              <td class="array-current-val" id="0x603ArrayCurrent"></td>
             </tr>
             <tr>
               <td>Battery Voltage</td>
@@ -179,28 +187,107 @@
             </tr>
           </table>
         </table-card>
-
         <graph-card>
           <div class="plot-container">
-            <div id="ArrayCurrent" class="plot-placeholder"></div>
+            <div id="array-current-graph" class="plot-placeholder"></div>
           </div>
         </graph-card>
-
         <graph-card>
           <div class="plot-container">
-            <div id="ArrayVoltage" class="plot-placeholder"></div>
+            <div id="array-voltage-graph" class="plot-placeholder"></div>
           </div>
         </graph-card>
-
         <graph-card>
           <div class="plot-container">
-            <div id="BatteryVoltage" class="plot-placeholder"></div>
+            <div id="array-battery-voltage-graph" class="plot-placeholder"></div>
           </div>
         </graph-card>
-
         <graph-card>
           <div class="plot-container">
-            <div id="Temperature" class="plot-placeholder"></div>
+            <div id="array-temperature-graph" class="plot-placeholder"></div>
+          </div>
+        </graph-card>
+      </div>
+
+
+      <div class="sub-container" id="batt-container" layout vertical center>
+        <table-card>
+          <table class="powertable">
+            <tr>
+              <th>Total Voltage: <span id="battery-voltage-total">None</span></th>
+              <th>Cell 1</th>
+              <th>Cell 2</th>
+              <th>Cell 3</th>
+              <th>Cell 4</th>
+              <th>Cell 5</th>
+              <th>Cell 6</th>
+              <th>Cell 7</th>
+              <th>Cell 8</th>
+              <th>Cell 9</th>
+              <th>Cell 10</th>
+              <th>Cell 11</th>
+              <th>Cell 12</th>
+            </tr>
+            <tr>
+              <td>Bottom</td>
+              <td class="battery-cell-voltage" id="0x130Voltage0"></td>
+              <td class="battery-cell-voltage" id="0x130Voltage1"></td>
+              <td class="battery-cell-voltage" id="0x130Voltage2"></td>
+              <td class="battery-cell-voltage" id="0x130Voltage3"></td>
+              <td class="battery-cell-voltage" id="0x131Voltage0"></td>
+              <td class="battery-cell-voltage" id="0x131Voltage1"></td>
+              <td class="battery-cell-voltage" id="0x131Voltage2"></td>
+              <td class="battery-cell-voltage" id="0x131Voltage3"></td>
+              <td class="battery-cell-voltage" id="0x132Voltage0"></td>
+              <td class="battery-cell-voltage" id="0x132Voltage1"></td>
+              <td class="battery-cell-voltage" id="0x132Voltage2"></td>
+              <td class="battery-cell-voltage" id="0x132Voltage3"></td>
+            </tr>
+            <tr>
+              <td>Middle</td>
+              <td class="battery-cell-voltage" id="0x140Voltage0"></td>
+              <td class="battery-cell-voltage" id="0x140Voltage1"></td>
+              <td class="battery-cell-voltage" id="0x140Voltage2"></td>
+              <td class="battery-cell-voltage" id="0x140Voltage3"></td>
+              <td class="battery-cell-voltage" id="0x141Voltage0"></td>
+              <td class="battery-cell-voltage" id="0x141Voltage1"></td>
+              <td class="battery-cell-voltage" id="0x141Voltage2"></td>
+              <td class="battery-cell-voltage" id="0x141Voltage3"></td>
+              <td class="battery-cell-voltage" id="0x142Voltage0"></td>
+              <td class="battery-cell-voltage" id="0x142Voltage1"></td>
+              <td class="battery-cell-voltage" id="0x142Voltage2"></td>
+              <td class="battery-cell-voltage" id="0x142Voltage3"></td>
+            </tr>
+            <tr>
+              <td>Top</td>
+              <td class="battery-cell-voltage" id="0x150Voltage0"></td>
+              <td class="battery-cell-voltage" id="0x150Voltage1"></td>
+              <td class="battery-cell-voltage" id="0x150Voltage2"></td>
+              <td class="battery-cell-voltage" id="0x150Voltage3"></td>
+              <td class="battery-cell-voltage" id="0x151Voltage0"></td>
+              <td class="battery-cell-voltage" id="0x151Voltage1"></td>
+              <td class="battery-cell-voltage" id="0x151Voltage2"></td>
+              <td class="battery-cell-voltage" id="0x151Voltage3"></td>
+              <td class="battery-cell-voltage" id="0x152Voltage0"></td>
+              <td class="battery-cell-voltage" id="0x152Voltage1"></td>
+              <td class="battery-cell-voltage" id="0x152Voltage2"></td>
+              <td class="battery-cell-voltage" id="0x152Voltage3"></td>
+            </tr>
+          </table>
+        </table-card>
+        <graph-card>
+          <div class="plot-container">
+            <div id="battery-cells-graph-low" class="plot-placeholder"></div>
+          </div>
+        </graph-card>
+        <graph-card>
+          <div class="plot-container">
+            <div id="battery-cells-graph-mid" class="plot-placeholder"></div>
+          </div>
+        </graph-card>
+        <graph-card>
+          <div class="plot-container">
+            <div id="battery-cells-graph-high" class="plot-placeholder"></div>
           </div>
         </graph-card>
       </div>

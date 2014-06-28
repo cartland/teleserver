@@ -33,6 +33,11 @@
     }
     tabs.selected = window.location.hash.slice(1);
     switchTabs(tabs.selected);
+    $(window).on('hashchange', function() {
+        tabs.selected = window.location.hash.slice(1);
+        switchTabs(tabs.selected);
+    });
+
 
     tabs.addEventListener('core-select', function() {
         window.location.hash = tabs.selected;
@@ -40,12 +45,79 @@
     });
 
     var graphs = new Graphs({
-        'placeholder': [
-            [0x402, 'BusVoltage', 'Voltage'],
-            [0x402, 'BusCurrent', 'Current'],
-            [0x403, 'VehicleVelocity', 'Velocity']
-        ]
-    }, '2m');
+            'home-graph': [
+                [0x402, 'BusVoltage', 'Voltage'],
+                [0x402, 'BusCurrent', 'Current'],
+                [0x403, 'VehicleVelocity', 'Velocity']
+            ],
+            'array-current-graph': [
+                [0x600, 'ArrayCurrent', 'Front Right Array Current'],
+                [0x601, 'ArrayCurrent', 'Front Left Array Current'],
+                [0x602, 'ArrayCurrent', 'Back Right Array Current'],
+                [0x603, 'ArrayCurrent', 'Back Left Array Current']
+            ],
+            'array-voltage-graph': [
+                [0x600, 'ArrayVoltage', 'Front Right Array Voltage'],
+                [0x601, 'ArrayVoltage', 'Front Left Array Voltage'],
+                [0x602, 'ArrayVoltage', 'Back Right Array Voltage'],
+                [0x603, 'ArrayVoltage', 'Back Left Array Voltage']
+            ],
+            'array-battery-voltage-graph': [
+                [0x600, 'BatteryVoltage', 'Front Right Battery Voltage'],
+                [0x601, 'BatteryVoltage', 'Front Left Battery Voltage'],
+                [0x602, 'BatteryVoltage', 'Back Right Battery Voltage'],
+                [0x603, 'BatteryVoltage', 'Back Left Battery Voltage']
+            ],
+            'array-temperature-graph': [
+                [0x600, 'Temperature', 'Front Right Array Temperature'],
+                [0x601, 'Temperature', 'Front Left Array Temperature'],
+                [0x602, 'Temperature', 'Back Right Array Temperature'],
+                [0x603, 'Temperature', 'Back Left Array Temperature']
+            ],
+            'battery-cells-graph-low': [
+                [0x130, 'Voltage0', 'Cell 00'],
+                [0x130, 'Voltage1', 'Cell 01'],
+                [0x130, 'Voltage2', 'Cell 02'],
+                [0x130, 'Voltage3', 'Cell 03'],
+                [0x131, 'Voltage0', 'Cell 04'],
+                [0x131, 'Voltage1', 'Cell 05'],
+                [0x131, 'Voltage2', 'Cell 06'],
+                [0x131, 'Voltage3', 'Cell 07'],
+                [0x132, 'Voltage0', 'Cell 08'],
+                [0x132, 'Voltage1', 'Cell 09'],
+                [0x132, 'Voltage2', 'Cell 10'],
+                [0x132, 'Voltage3', 'Cell 11']
+            ],
+            'battery-cells-graph-mid': [
+                [0x140, 'Voltage0', 'Cell 12'],
+                [0x140, 'Voltage1', 'Cell 13'],
+                [0x140, 'Voltage2', 'Cell 14'],
+                [0x140, 'Voltage3', 'Cell 15'],
+                [0x141, 'Voltage0', 'Cell 16'],
+                [0x141, 'Voltage1', 'Cell 17'],
+                [0x141, 'Voltage2', 'Cell 18'],
+                [0x141, 'Voltage3', 'Cell 19'],
+                [0x142, 'Voltage0', 'Cell 20'],
+                [0x142, 'Voltage1', 'Cell 21'],
+                [0x142, 'Voltage2', 'Cell 22'],
+                [0x142, 'Voltage3', 'Cell 23']
+            ],
+            'battery-cells-graph-high': [
+                [0x150, 'Voltage0', 'Cell 24'],
+                [0x150, 'Voltage1', 'Cell 25'],
+                [0x150, 'Voltage2', 'Cell 26'],
+                [0x150, 'Voltage3', 'Cell 27'],
+                [0x151, 'Voltage0', 'Cell 28'],
+                [0x151, 'Voltage1', 'Cell 29'],
+                [0x151, 'Voltage2', 'Cell 30'],
+                [0x151, 'Voltage3', 'Cell 31'],
+                [0x152, 'Voltage0', 'Cell 32'],
+                [0x152, 'Voltage1', 'Cell 33'],
+                [0x152, 'Voltage2', 'Cell 34'],
+                [0x152, 'Voltage3', 'Cell 35']
+            ]
+        },
+        '2m');
 
     $(function() {
 
@@ -85,6 +157,20 @@
                     }
                 }
             }
+
+            // Update the total current from the array
+            var sum = 0;
+            $('.array-current-val').each(function() {
+                sum += getNum($(this).text());
+            });
+            $('#array-current-total').text(sum);
+
+            // Update the total voltage of the batteries
+            sum = 0;
+            $('.battery-cell-voltage').each(function() {
+                sum += getNum($(this).text());
+            });
+            $('#battery-voltage-total').text(sum);
         };
     });
 })(jQuery);

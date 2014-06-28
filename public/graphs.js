@@ -20,9 +20,10 @@ var Graphs = function() {
         var graphid = graph[0];
         var graphData = graph[2];
         return function() {
-            if ($('#' + graphid).is(':visible')) {
+            var elem = $('#' + graphid);
+            if (elem.is(':visible') && elem.width() && elem.height()) {
                 graph[1] = $.plot('#' + graphid, graphData, plotDefaults);
-                $('#' + graphid).bind('plothover', tooltip());
+                elem.bind('plothover', tooltip());
             }
         }
     }
@@ -82,6 +83,7 @@ var Graphs = function() {
         window.setInterval(
             function() {
                 for (var i = 0; i < graphs.length; i++) {
+                    var graph = graphs[i];
                     var graphid = graph[0];
                     var plot = graph[1];
                     var graphData = graph[2];

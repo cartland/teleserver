@@ -93,23 +93,23 @@ func TestServeFlot(t *testing.T) {
 		{fmt.Sprintf("/data?canid=%d&field=BusVoltage", msgs.GetID(bus)), `[]` + "\n"},
 		{
 			fmt.Sprintf("/data?canid=%d&field=BusVoltage&time=45m", msgs.GetID(bus)),
-			`[{"label":"0x402 - BusVoltage","data":[[1403157354184,1.5]]}]` + "\n",
+			`[{"label":"0x402BusVoltage","data":[[1403157354184,1.5]]}]` + "\n",
 		},
 		{
 			fmt.Sprintf("/data?canid=%d&field=VehicleVelocity&time=45m", msgs.GetID(v)),
-			`[{"label":"0x403 - VehicleVelocity","data":[[1403157734191,2]]}]` + "\n",
+			`[{"label":"0x403VehicleVelocity","data":[[1403157734191,2]]}]` + "\n",
 		},
 		{
 			fmt.Sprintf("/data?canid=%d&canid=%d&time=45m&field=BusVoltage", msgs.GetID(v), msgs.GetID(bus)),
-			`[{"label":"0x402 - BusVoltage","data":[[1403157462723,1.5]]}]` + "\n",
+			`[{"label":"0x402BusVoltage","data":[[1403157462723,1.5]]}]` + "\n",
 		},
 		{
 			fmt.Sprintf("/data?canid=%d&time=1h20m&field=BusVoltage", msgs.GetID(bus)),
-			`[{"label":"0x402 - BusVoltage","data":[[1403155825986,0],[1403157625986,1.5]]}]` + "\n",
+			`[{"label":"0x402BusVoltage","data":[[1403155825986,0],[1403157625986,1.5]]}]` + "\n",
 		},
 		{
 			fmt.Sprintf("/data?canid=%d&canid=%d&time=45m&field=BusVoltage&field=BusCurrent&field=VehicleVelocity", msgs.GetID(v), msgs.GetID(bus)),
-			`[{"label":"0x402 - BusVoltage","data":[[1403157734191,1.5]]},{"label":"0x402 - BusCurrent","data":[[1403157734191,3]]},{"label":"0x403 - VehicleVelocity","data":[[1403157734191,2]]}]` + "\n",
+			`[{"label":"0x402BusVoltage","data":[[1403157734191,1.5]]},{"label":"0x402BusCurrent","data":[[1403157734191,3]]},{"label":"0x403VehicleVelocity","data":[[1403157734191,2]]}]` + "\n",
 		},
 	}
 

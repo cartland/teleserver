@@ -20,8 +20,10 @@ var Graphs = function() {
         var graphid = graph[0];
         var graphData = graph[2];
         return function() {
-            graph[1] = $.plot('#' + graphid, graphData, plotDefaults);
-            $('#' + graphid).bind('plothover', tooltip());
+            if ($('#' + graphid).is(':visible')) {
+                graph[1] = $.plot('#' + graphid, graphData, plotDefaults);
+                $('#' + graphid).bind('plothover', tooltip());
+            }
         }
     }
 
@@ -48,7 +50,6 @@ var Graphs = function() {
                     fields.push(label[1]);
                     var msgid = getIdForMsg(label[0], label[1]);
                     if (!(msgid in plotData)) {
-                        debugger;
                         plotData[msgid] = [];
                     }
                     graphData.push({
@@ -97,8 +98,8 @@ var Graphs = function() {
         // update takes in a message id and a [time, val] pair.
         var bufferedMillis = parseDuration(time);
         this.update = function(id, point) {
-            if (plotData[id] !== undefined) {
-                var series = plotData[id];
+            var series = plotData[id];
+            if (series !== undefined && series.length) {
                 series.push(point);
                 while (series.length > 1 &&
                     point[0] - series[0][0] > bufferedMillis) {

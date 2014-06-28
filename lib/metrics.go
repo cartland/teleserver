@@ -108,7 +108,7 @@ func ServeFlotGraphs(db *DB) func(http.ResponseWriter, *http.Request) {
 		for _, field := range r.Form["field"] {
 			for _, metric := range metrics {
 				if len(metric) > 0 && hasField(metric[0], field) {
-					graph := GraphData{Label: fmt.Sprintf("0x%x - %s", metric[0].CANID, field)}
+					graph := GraphData{Label: fmt.Sprintf("0x%x%s", metric[0].CANID, field)}
 					for _, m := range metric {
 						graph.Data = append(graph.Data, point{m.Time, reflect.ValueOf(m.CAN).Elem().FieldByName(field).Interface()})
 					}

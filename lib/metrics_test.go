@@ -108,6 +108,10 @@ func TestServeFlot(t *testing.T) {
 			`[{"label":"0x402BusVoltage","data":[[1403155825986,0],[1403157625986,1.5]]}]` + "\n",
 		},
 		{
+			fmt.Sprintf("/data?canid=%[1]d&canid=%[1]d&time=1h20m&field=BusVoltage", msgs.GetID(bus)),
+			`[{"label":"0x402BusVoltage","data":[[1403155825986,0],[1403157625986,1.5]]}]` + "\n",
+		},
+		{
 			fmt.Sprintf("/data?canid=%d&canid=%d&time=45m&field=BusVoltage&field=BusCurrent&field=VehicleVelocity", msgs.GetID(v), msgs.GetID(bus)),
 			`[{"label":"0x402BusVoltage","data":[[1403157734191,1.5]]},{"label":"0x402BusCurrent","data":[[1403157734191,3]]},{"label":"0x403VehicleVelocity","data":[[1403157734191,2]]}]` + "\n",
 		},

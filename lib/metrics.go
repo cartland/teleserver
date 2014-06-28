@@ -90,29 +90,37 @@ func ServeFlotGraphs(db *DB) func(http.ResponseWriter, *http.Request) {
 		}
 
 		metrics := [][]*msgs.CANPlus{}
+		ids := make(map[string]bool)
 		for _, id := range r.Form["canid"] {
-			canid, err := strconv.Atoi(id)
-			if err != nil {
-				log.Println(err)
-				continue
+			if !ids[id] {
+				ids[id] = true
+				canid, err := strconv.Atoi(id)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				metric, err := db.GetSince(d, uint16(canid))
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				metrics = append(metrics, metric)
 			}
-			metric, err := db.GetSince(d, uint16(canid))
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			metrics = append(metrics, metric)
 		}
 
 		s := []GraphData{}
+		fields := make(map[string]bool)
 		for _, field := range r.Form["field"] {
-			for _, metric := range metrics {
-				if len(metric) > 0 && hasField(metric[0], field) {
-					graph := GraphData{Label: fmt.Sprintf("0x%x%s", metric[0].CANID, field)}
-					for _, m := range metric {
-						graph.Data = append(graph.Data, point{m.Time, reflect.ValueOf(m.CAN).Elem().FieldByName(field).Interface()})
+			if !fields[field] {
+				fields[field] = true
+				for _, metric := range metrics {
+					if len(metric) > 0 && hasField(metric[0], field) {
+						graph := GraphData{Label: fmt.Sprintf("0x%x%s", metric[0].CANID, field)}
+						for _, m := range metric {
+							graph.Data = append(graph.Data, point{m.Time, reflect.ValueOf(m.CAN).Elem().FieldByName(field).Interface()})
+						}
+						s = append(s, graph)
 					}
-					s = append(s, graph)
 				}
 			}
 		}

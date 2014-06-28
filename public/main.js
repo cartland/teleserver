@@ -1,4 +1,45 @@
 (function($) {
+
+    // Handle tab switching
+    var home = $("#home-container");
+    var solar = $("#solar-container");
+    var dash = $("#dash-container");
+    var batt = $("#batt-container");
+
+    function switchTabs(newTab) {
+        home.hide();
+        solar.hide();
+        dash.hide();
+        batt.hide();
+        switch (newTab) {
+            case "home":
+                home.show();
+                break;
+            case "solar":
+                solar.show();
+                break;
+            case "dash":
+                dash.show();
+                break;
+            case "batt":
+                batt.show();
+                break;
+        }
+    }
+    var tabs = document.querySelector('paper-tabs');
+
+    if (!window.location.hash) {
+        window.location.hash = "home";
+    }
+    tabs.selected = window.location.hash.slice(1);
+    switchTabs(tabs.selected);
+
+    tabs.addEventListener('core-select', function() {
+        window.location.hash = tabs.selected;
+        switchTabs(tabs.selected);
+    });
+
+
     // How long to have graph data
     var bufferedTime = 1 * 60 * 1000 // 1m * 60s/m * 1000 ms/s
 
@@ -6,12 +47,17 @@
     var dataArray = [];
 
     // Create the graph
-    var plot
-    makePlot = function() {
+    var plot;
+    var makePlot = function() {
         plot = $.plot($("#placeholder"), dataArray, plotDefaults);
     }
-    makePlot()
+    makePlot();
     $(window).resize(makePlot);
+    $(window).on("hashchange", function() {
+        tabs.selected = window.location.hash.slice(1)
+        switchTabs(tabs.selected);
+        makePlot();
+    });
     window.setTimeout(makePlot, 1);
     $("#placeholder").bind("plothover", tooltip());
 

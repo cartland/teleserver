@@ -38,6 +38,9 @@
   paper-tab::shadow #ink {
       color: #B9D3B6;
   }
+  .sub-container {
+    width:100%;
+  }
   .container {
     width: 80%;
     margin: 50px auto;
@@ -93,33 +96,106 @@
         <paper-tab name="batt"><core-icon icon="image:flash-on" size="32"></core-icon>BATT</paper-tab>
       </paper-tabs>
     </core-toolbar>
-    <div class="container" id="home-container" layout vertical center>
+
+    <div class="container" layout vertical center>
       <div class="right-slider" center horizontal layout>
         <div>Timescale (s)</div>
         <paper-slider pin snaps min="10" max="600" value="120"></paper-slider>
       </div>
-      <table-card>
-        <div class="metric-container">
-          <div class="metric">
-            <h2 id="BusVoltage">None</h2>
-            Battery (V)
+
+
+
+      <div class="sub-container" id="home-container"layout vertical center>
+        <table-card>
+          <div class="metric-container">
+            <div class="metric">
+              <h2 id="BusVoltage">None</h2>
+              Battery (V)
+            </div>
+            <div class="metric">
+              <h1 id="VehicleVelocity">None</h1>
+              Speed (MPH)
+            </div>
+            <div class="metric">
+              <h2 id="BusCurrent">None</h2>
+              Current (A)
+            </div>
           </div>
-          <div class="metric">
-            <h1 id="VehicleVelocity">None</h1>
-            Speed (MPH)
+        </table-card>
+        <graph-card>
+          <h2>Speed</h2>
+          <div class="plot-container">
+            <div id="placeholder" class="plot-placeholder"></div>
           </div>
-          <div class="metric">
-            <h2 id="BusCurrent">None</h2>
-            Current (A)
+        </graph-card>
+      </div>
+
+      <div class="container" id="solar-container">
+        <table-card>
+          <table class="powertable">
+            <tr>
+            <th>Total Current: <span id="total">0</span></th>
+              <th>Front Right Array (0x600)</th>
+              <th>Front Left Array (0x601)</th>
+              <th>Back Right Array (0x602)</th>
+              <th>Back Left Array (0x603)</th>
+            </tr>
+            <tr>
+              <td>Array Voltage</td>
+              <td id="FrontRightArrayVoltage"></td>
+              <td id="FrontLeftArrayVoltage"></td>
+              <td id="BackRightArrayVoltage"></td>
+              <td id="BackLeftArrayVoltage"></td>
+            </tr>
+            <tr>
+              <td>Array Current</td>
+              <td class="ArrayCurrentVal" id="FrontRightArrayCurrent"></td>
+              <td class="ArrayCurrentVal" id="FrontLeftArrayCurrent"></td>
+              <td class="ArrayCurrentVal" id="BackRightArrayCurrent"></td>
+              <td class="ArrayCurrentVal" id="BackLeftArrayCurrent"></td>
+            </tr>
+            <tr>
+              <td>Battery Voltage</td>
+              <td id="FrontRightBatteryVoltage"></td>
+              <td id="FrontLeftBatteryVoltage"></td>
+              <td id="BackRightBatteryVoltage"></td>
+              <td id="BackLeftBatteryVoltage"></td>
+            </tr>
+            <tr>
+              <td>Temperature</td>
+              <td id="FrontRightTemperature"></td>
+              <td id="FrontLeftTemperature"></td>
+              <td id="BackRightTemperature"></td>
+              <td id="BackLeftTemperature"></td>
+            </tr>
+          </table>
+        </table-card>
+
+        <graph-card>
+          <div class="plot-container">
+            <div id="ArrayCurrent" class="plot-placeholder"></div>
           </div>
-        </div>
-      </table-card>
-      <graph-card>
-        <h2>Speed</h2>
-        <div class="plot-container">
-          <div id="placeholder" class="plot-placeholder"></div>
-        </div>
-      </graph-card>
+        </graph-card>
+
+        <graph-card>
+          <div class="plot-container">
+            <div id="ArrayVoltage" class="plot-placeholder"></div>
+          </div>
+        </graph-card>
+
+        <graph-card>
+          <div class="plot-container">
+            <div id="BatteryVoltage" class="plot-placeholder"></div>
+          </div>
+        </graph-card>
+
+        <graph-card>
+          <div class="plot-container">
+            <div id="Temperature" class="plot-placeholder"></div>
+          </div>
+        </graph-card>
+      </div>
+
     </div>
 
     <div layout vertical center>
@@ -135,18 +211,6 @@
   <script language="javascript" type="text/javascript" src="/flot/jquery.flot.time.min.js"></script>
   <script language="javascript" type="text/javascript" src="/common.js"></script>
   <script language="javascript" type="text/javascript" src="/main.js"></script>
-  <script>
-    var tabs = document.querySelector('paper-tabs');
-
-    if (!window.location.hash) {
-      window.location.hash = "home"
-    }
-    tabs.selected = window.location.hash.slice(1)
-
-    tabs.addEventListener('core-select', function() {
-      window.location.hash = tabs.selected;
-    });
-  </script>
 </body>
 
 </html>

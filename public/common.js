@@ -7,31 +7,35 @@ var plotDefaults = {
     },
     grid: {
         hoverable: true,
-        mouseActiveRadius: 30,
+        mouseActiveRadius: 30
     },
     xaxis: {
-        mode: "time",
-        timeformat: "%H:%M:%S",
-        timezone: "browser",
+        mode: 'time',
+        timeformat: '%H:%M:%S',
+        timezone: 'browser',
         zoomRange: [null, null],
-        panRange: [null, null],
+        panRange: [null, null]
     },
     yaxis: {
         zoomRange: false,
-        panRange: false,
+        panRange: false
     },
     zoom: {
         interactive: true
     },
     pan: {
         interactive: true
-    },
-}
+    }
+};
+
+var getIdForMsg = function(canID, field) {
+    return '0x' + parseInt(canID, 10).toString(16) + field;
+};
 
 var getNum = function(str) {
     var i = parseFloat(str);
     return isNaN(i) ? 0 : i;
-}
+};
 
 var parseDuration = function(str) {
     var milliseconds = 0;
@@ -44,7 +48,7 @@ var parseDuration = function(str) {
         milliseconds += parseInt(seconds[1]) * 1000;
     }
     return milliseconds;
-}
+};
 
 var tooltip = function() {
     function showTooltip(x, y, contents) {
@@ -57,25 +61,25 @@ var tooltip = function() {
             padding: '2px',
             'background-color': '#eef',
             opacity: 0.80
-        }).appendTo("body").fadeIn(0);
+        }).appendTo('body').fadeIn(0);
     }
 
-    var previousPoint
+    var previousPoint;
     return function(event, pos, item) {
         if (item) {
             if (previousPoint != item.dataIndex) {
                 previousPoint = item.dataIndex;
 
-                $("#tooltip").remove();
+                $('#tooltip').remove();
                 var x = item.datapoint[0].toFixed(2),
                     y = item.datapoint[1].toFixed(2);
 
                 showTooltip(item.pageX, item.pageY,
-                    item.series.label + ": " + y);
+                    item.series.label + ': ' + y);
             }
         } else {
-            $("#tooltip").remove();
+            $('#tooltip').remove();
             previousPoint = null;
         }
     }
-}
+};

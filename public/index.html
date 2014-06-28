@@ -41,6 +41,19 @@
   .sub-container {
     width:100%;
   }
+  .powertable, .powertable td, .powertable th {
+    text-align: center;
+    margin: auto;
+  }
+  .powertable {
+    width:100%;
+  }
+  .powertable th {
+    background-color: #B9D3B6;
+  }
+  .powertable td {
+    background-color: #C2B9A7;
+  }
   .container {
     width: 80%;
     margin: 50px auto;
@@ -98,26 +111,22 @@
     </core-toolbar>
 
     <div class="container" layout vertical center>
-      <div class="right-slider" center horizontal layout>
-        <div>Timescale (s)</div>
-        <paper-slider pin snaps min="10" max="600" value="120"></paper-slider>
-      </div>
 
 
 
-      <div class="sub-container" id="home-container"layout vertical center>
+      <div class="sub-container" id="home-container" layout vertical center>
         <table-card>
           <div class="metric-container">
             <div class="metric">
-              <h2 id="BusVoltage">None</h2>
+              <h2 id="0x402BusVoltage">-</h2>
               Battery (V)
             </div>
             <div class="metric">
-              <h1 id="VehicleVelocity">None</h1>
+              <h1 id="0x403VehicleVelocity">-</h1>
               Speed (MPH)
             </div>
             <div class="metric">
-              <h2 id="BusCurrent">None</h2>
+              <h2 id="0x402BusCurrent">-</h2>
               Current (A)
             </div>
           </div>
@@ -130,7 +139,7 @@
         </graph-card>
       </div>
 
-      <div class="container" id="solar-container">
+      <div class="sub-container" id="solar-container" layout vertical center>
         <table-card>
           <table class="powertable">
             <tr>
@@ -142,31 +151,31 @@
             </tr>
             <tr>
               <td>Array Voltage</td>
-              <td id="FrontRightArrayVoltage"></td>
-              <td id="FrontLeftArrayVoltage"></td>
-              <td id="BackRightArrayVoltage"></td>
-              <td id="BackLeftArrayVoltage"></td>
+              <td id="0x600ArrayVoltage"></td>
+              <td id="0x601ArrayVoltage"></td>
+              <td id="0x602ArrayVoltage"></td>
+              <td id="0x603ArrayVoltage"></td>
             </tr>
             <tr>
               <td>Array Current</td>
-              <td class="ArrayCurrentVal" id="FrontRightArrayCurrent"></td>
-              <td class="ArrayCurrentVal" id="FrontLeftArrayCurrent"></td>
-              <td class="ArrayCurrentVal" id="BackRightArrayCurrent"></td>
-              <td class="ArrayCurrentVal" id="BackLeftArrayCurrent"></td>
+              <td class="ArrayCurrentVal" id="0x600ArrayCurrent"></td>
+              <td class="ArrayCurrentVal" id="0x601ArrayCurrent"></td>
+              <td class="ArrayCurrentVal" id="0x602ArrayCurrent"></td>
+              <td class="ArrayCurrentVal" id="0x603ArrayCurrent"></td>
             </tr>
             <tr>
               <td>Battery Voltage</td>
-              <td id="FrontRightBatteryVoltage"></td>
-              <td id="FrontLeftBatteryVoltage"></td>
-              <td id="BackRightBatteryVoltage"></td>
-              <td id="BackLeftBatteryVoltage"></td>
+              <td id="0x600BatteryVoltage"></td>
+              <td id="0x601BatteryVoltage"></td>
+              <td id="0x602BatteryVoltage"></td>
+              <td id="0x603BatteryVoltage"></td>
             </tr>
             <tr>
               <td>Temperature</td>
-              <td id="FrontRightTemperature"></td>
-              <td id="FrontLeftTemperature"></td>
-              <td id="BackRightTemperature"></td>
-              <td id="BackLeftTemperature"></td>
+              <td id="0x600Temperature"></td>
+              <td id="0x601Temperature"></td>
+              <td id="0x602Temperature"></td>
+              <td id="0x603Temperature"></td>
             </tr>
           </table>
         </table-card>
@@ -210,6 +219,7 @@
   <script language="javascript" type="text/javascript" src="/flot/jquery.flot.min.js"></script>
   <script language="javascript" type="text/javascript" src="/flot/jquery.flot.time.min.js"></script>
   <script language="javascript" type="text/javascript" src="/common.js"></script>
+  <script language="javascript" type="text/javascript" src="/graphs.js"></script>
   <script language="javascript" type="text/javascript" src="/main.js"></script>
 </body>
 

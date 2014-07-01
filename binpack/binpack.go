@@ -6,9 +6,7 @@ package binpack
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -55,9 +53,6 @@ func Unmarshal(data []byte, v interface{}) error {
 	if d := reflect.ValueOf(v); d.Kind() == reflect.Ptr {
 		if rv := d.Elem(); rv.Kind() == reflect.Struct {
 			if s := binpackSize(rv); s > 0 {
-				if s != len(data) {
-					return errors.New("wrong size for binpack.Unmarshal")
-				}
 				dec := &decoder{data}
 				return dec.value(rv)
 			}
@@ -72,7 +67,7 @@ type decoder struct{ data []byte }
 func (d *decoder) value(v reflect.Value) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("%v", err)
+			err = fmt.Errorf("%v", r)
 		}
 	}()
 	t := v.Type()
@@ -88,14 +83,18 @@ func (d *decoder) value(v reflect.Value) (err error) {
 }
 func (d *decoder) decodeTag(v reflect.Value, tag string) error {
 	field := v.Addr().Interface()
-	var start, end uint
-	if s, err := strconv.Atoi(tag); err == nil {
+	var start, end int
+	var bit uint
+	if s, err := strconv.Atoi(tag); err == nil && inRange(d.data, s, s+1) {
 		return binary.Read(bytes.NewReader(d.data[s:s+1]), binary.LittleEndian, field)
-	} else if n, err := fmt.Sscanf(tag, "%d-%d", &start, &end); n > 0 && err == nil {
+	} else if n, err := fmt.Sscanf(tag, "%d-%d", &start, &end); n > 0 && err == nil && inRange(d.data, start, end) {
 		return binary.Read(bytes.NewReader(d.data[start:end]), binary.LittleEndian, field)
-	} else if n, err := fmt.Sscanf(tag, "%d.%d", &start, &end); n > 0 && err == nil {
-		log.Print(start, end, d.data)
-		v.SetBool(d.data[start]&(1<<end) != 0)
+	} else if n, err := fmt.Sscanf(tag, "%d.%d", &start, &bit); n > 0 && err == nil && start < len(d.data) {
+		v.SetBool(d.data[start]&(1<<bit) != 0)
 	}
 	return nil
+}
+
+func inRange(s []byte, a, b int) bool {
+	return (0 <= a) && (a <= b) && (b <= len(s))
 }

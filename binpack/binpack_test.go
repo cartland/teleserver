@@ -27,6 +27,11 @@ type UnpackLargerThanNeeded struct {
 	B bool `binpack:"0.0"`
 }
 
+type UnpackSparseBytes struct {
+	A byte `binpack:"0"`
+	B byte `binpack:"6"`
+}
+
 func TestUnmarshal(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -62,6 +67,24 @@ func TestUnmarshal(t *testing.T) {
 			start: &UnpackLargerThanNeeded{},
 			bytes: []byte{0x2, 0x3},
 			want:  &UnpackLargerThanNeeded{true, false},
+		},
+		{
+			name:  "Unpack sparse bytes",
+			start: &UnpackSparseBytes{},
+			bytes: []byte{0xcd, 0xcc, 0x44, 0x41, 0x66, 0x66, 0x36},
+			want:  &UnpackSparseBytes{0xcd, 0x36},
+		},
+		{
+			name:  "Unpack too many sparse bytes",
+			start: &UnpackSparseBytes{},
+			bytes: []byte{0xcd, 0xcc, 0x44, 0x41, 0x66, 0x66, 0x36, 0x42},
+			want:  &UnpackSparseBytes{0xcd, 0x36},
+		},
+		{
+			name:  "Unpack too few sparse bytes",
+			start: &UnpackSparseBytes{},
+			bytes: []byte{0xcd, 0xcc, 0x44, 0x41, 0x66, 0x66},
+			want:  &UnpackSparseBytes{0xcd, 0x00},
 		},
 	}
 

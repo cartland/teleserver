@@ -20,6 +20,8 @@ var idToMessage = map[uint16]CAN{
 	0x260: &CutoffTrigger{},
 	0x261: &CutoffAnalogIn{},
 	0x262: &CutoffSPIIn{},
+	0x280: &CANAccelPos{},
+	0x281: &CANBrakePos{},
 	0x402: &BusMeasurement{},
 	0x403: &VelocityMeasurement{},
 	0x501: &MotorDriveCommand{},
@@ -32,6 +34,7 @@ var idToMessage = map[uint16]CAN{
 	0x611: &MPPTEnable{ID: 0x611, ArrayLocation: "FrontLeft"},
 	0x612: &MPPTEnable{ID: 0x612, ArrayLocation: "BackRight"},
 	0x613: &MPPTEnable{ID: 0x613, ArrayLocation: "BackLeft"},
+	0x700: &PanelSwitchPos{},
 }
 
 // IDToMessage provides a mapping from message ids to message types.

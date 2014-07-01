@@ -22,6 +22,10 @@ type UnpackBools struct {
 	A bool `binpack:"0.1"`
 	B bool `binpack:"0.0"`
 }
+type UnpackLargerThanNeeded struct {
+	A bool `binpack:"0.1"`
+	B bool `binpack:"0.0"`
+}
 
 func TestUnmarshal(t *testing.T) {
 	tests := []struct {
@@ -52,6 +56,12 @@ func TestUnmarshal(t *testing.T) {
 			start: &UnpackBools{},
 			bytes: []byte{0x2},
 			want:  &UnpackBools{true, false},
+		},
+		{
+			name:  "Unpack larger than needed",
+			start: &UnpackLargerThanNeeded{},
+			bytes: []byte{0x2, 0x3},
+			want:  &UnpackLargerThanNeeded{true, false},
 		},
 	}
 

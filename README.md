@@ -9,22 +9,16 @@ tablet.
 At minimum you'll want `-fake`, `-serial`, or `-can_addr` as a data source.
 Setting `-sqlite` to a filename is needed if you want to read the data later.
 
-## Installation
-1. Install the most recent version of go from http://golang.org/doc/install
-2. Create your $GOPATH with `mkdir $HOME/go && export GOPATH=$HOME/go` (http://golang.org/doc/code.html)
-3. Run `go get -u github.com/calsol/teleserver` to fetch the binary
-4. Run the binary (`$GOPATH/bin/teleserver -serial /dev/tty`)
-5. Navigate to http://localhost:8080
-
-After changing any files in the /public directory, be sure to run
- `go-bindata -o embedded/assets.go -ignore \\.bower\.json -ignore bower_components/marked -ignore \demos -ignore \core-tests -ignore bower_components/highlightjs -nomemcopy -pkg embedded public/...`.
-  This will update the resources embedded in the the binary.
-
-To install go-bindata, run `go get github.com/jteeuwen/go-bindata/...`
+## Installation from source (recommended)
+1. Install the most recent version of go from http://golang.org/doc/install.
+2. In a terminal, create your [$GOPATH](http://golang.org/cmd/go/#hdr-GOPATH_environment_variable) with `mkdir $HOME/go && export GOPATH=$HOME/go`. For Windows, see [this thread](https://groups.google.com/forum/#!topic/golang-nuts/QVPKm7pbhds).
+3. Run `go get -u github.com/calsol/teleserver` to fetch the binary. You will need git to do this.
+4. Run the binary (`$GOPATH/bin/teleserver -fake`). For getting data from the car, use the `-serial` flag with the appropriate port instead of the `-fake` flag.
+5. Navigate to [http://localhost:8080](http://localhost:8080).
 
 ### Flags
 * `-port`: Port for the webserver. Default is 8080.
-* `-serial`: Port for the serial uart connection.
+* `-serial`: Port for the serial uart connection. Most often something like `/dev/tty.*` for Linux/OSX and something like `COM12` for Windows.
 * `-baud`: Baud rate for the serial port. Default is 115200.
 * `-can_addr`: Port for SocketCAN.
 * `-fake`: Ignore ports, serve fake data.
@@ -44,10 +38,17 @@ To install go-bindata, run `go get github.com/jteeuwen/go-bindata/...`
   intersection of everything that matches.
 
 ### Documentation
-Documentation for most of the functionality: [![GoDoc](https://godoc.org/github.com/CalSol/teleserver/lib?status.png)](https://godoc.org/github.com/CalSol/teleserver/lib)
+* Documentation for most of the functionality: [![GoDoc](https://godoc.org/github.com/CalSol/teleserver/lib?status.png)](https://godoc.org/github.com/CalSol/teleserver/lib)
 
-CAN Documentation: [![GoDoc](https://godoc.org/github.com/CalSol/teleserver/can?status.png)](https://godoc.org/github.com/CalSol/teleserver/can)
+* CAN Documentation: [![GoDoc](https://godoc.org/github.com/CalSol/teleserver/can?status.png)](https://godoc.org/github.com/CalSol/teleserver/can)
 
-Embedded Files Documentation: [![GoDoc](https://godoc.org/github.com/CalSol/teleserver/embedded?status.png)](https://godoc.org/github.com/CalSol/teleserver/embedded)
+* Embedded Files Documentation: [![GoDoc](https://godoc.org/github.com/CalSol/teleserver/embedded?status.png)](https://godoc.org/github.com/CalSol/teleserver/embedded)
+
+After changing any files in the /public directory, be sure to run
+ `go-bindata -o embedded/assets.go -ignore \\.bower\.json -ignore bower_components/marked -ignore \demos -ignore \core-tests -ignore bower_components/highlightjs -nomemcopy -pkg embedded public/...`.
+  This will update the resources embedded in the the binary.
+
+To install go-bindata, run `go get github.com/jteeuwen/go-bindata/...`
+
 
 

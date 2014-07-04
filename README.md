@@ -12,7 +12,7 @@ Setting `-sqlite` to a filename is needed if you want to read the data later.
 ## Installation
 1. Install the most recent version of go from http://golang.org/doc/install
 2. Create your $GOPATH with `mkdir $HOME/go && export GOPATH=$HOME/go` (http://golang.org/doc/code.html)
-3. Run `go get github.com/calsol/teleserver` to fetch the binary
+3. Run `go get -u github.com/calsol/teleserver` to fetch the binary
 4. Run the binary (`$GOPATH/bin/teleserver -serial /dev/tty`)
 5. Navigate to http://localhost:8080
 

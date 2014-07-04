@@ -47,17 +47,13 @@ func TestSendCAN(t *testing.T) {
 		},
 		{
 			"/sendbytes",
-			"CANSocket not running, " +
-				"cannot send &can.Frame{ID:0x7b, DataLen:0x3, Padding:[3]uint8{0x0, 0x0, 0x0}, " +
-				"Data:[8]uint8{0x1, 0x2, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0}} over CAN\n",
+			"CANSocket not running, cannot send {123 [1 2 3]} over CAN\n",
 			url.Values{"id": {"123"}, "length": {"3"},
 				"byte0": {"1"}, "byte1": {"2"}, "byte2": {"3"}, "byte3": {"4"}},
 		},
 		{
 			"/sendfloats",
-			"CANSocket not running, " +
-				"cannot send &can.Frame{ID:0x7b, DataLen:0x8, Padding:[3]uint8{0x0, 0x0, 0x0}, " +
-				"Data:[8]uint8{0x0, 0x0, 0x0, 0x3f, 0x9a, 0x99, 0x99, 0x3f}} over CAN\n",
+			"CANSocket not running, cannot send {123 [0 0 0 63 154 153 153 63]} over CAN\n",
 			url.Values{"id": {"123"}, "float0": {"0.5"}, "float1": {"1.2"}},
 		},
 	}

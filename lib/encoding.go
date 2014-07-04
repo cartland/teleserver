@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func frameFromForm(dataType string, r *http.Request) (*can.Frame, error) {
+func msgFromForm(dataType string, r *http.Request) (can.Message, error) {
 	id, err := strconv.Atoi(r.FormValue("id"))
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse id: %v", err)
@@ -32,7 +32,7 @@ func frameFromForm(dataType string, r *http.Request) (*can.Frame, error) {
 			}
 			b = append(b, byte(formByte))
 		}
-		return can.NewFrame(uint32(id), b), nil
+		return can.Simple{id, b}, nil
 
 	case "floats":
 		var floats []float32
@@ -49,7 +49,7 @@ func frameFromForm(dataType string, r *http.Request) (*can.Frame, error) {
 				return nil, fmt.Errorf("binary.Write failed: %v", err)
 			}
 		}
-		return can.NewFrame(uint32(id), buf.Bytes()), nil
+		return can.Simple{id, buf.Bytes()}, nil
 
 	default:
 		return nil, fmt.Errorf("%s is an invalid send type", dataType)
@@ -67,23 +67,23 @@ func HandleSendToCAN(c can.Conn) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		dataType := mux.Vars(r)["type"]
-		frame, err := frameFromForm(dataType, r)
+		msg, err := msgFromForm(dataType, r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		log.Printf("Got CAN request, want to send %v", frame)
+		log.Printf("Got CAN request, want to send %v", msg)
 		if c == nil {
-			http.Error(w, fmt.Sprintf("CANSocket not running, cannot send %#v over CAN", frame), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("CANSocket not running, cannot send %v over CAN", msg), http.StatusInternalServerError)
 			return
 		}
 
-		if err := c.WriteFrame(frame); err != nil {
+		if err := c.WriteFrame(can.NewFrame(msg)); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		log.Printf("Sent %v", frame)
-		fmt.Fprintf(w, "Successfully wrote data %#v", frame)
+		log.Printf("Sent %v", msg)
+		fmt.Fprintf(w, "Successfully wrote data %#v", msg)
 	}
 }

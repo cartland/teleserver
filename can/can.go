@@ -22,12 +22,16 @@ var FrameSize = reflect.TypeOf(Frame{}).Size()
 type Frame struct {
 	ID      uint32  // The CAN ID of the frame and CAN_*_FLAG flags
 	DataLen uint8   // Data length code: 0 .. 8
-	Padding [3]byte // Spacing to make sure that everything lines up
+	_       [3]byte // Spacing to make sure that everything lines up
 	Data    [8]byte
 }
 
+func (f Frame) CANID() int      { return int(f.ID) }
+func (f Frame) CANData() []byte { return f.Data[:] }
+
 // NewFrame returns a new CAN Frame. Data is truncated after 8 bytes.
-func NewFrame(id uint32, data []byte) *Frame {
+func NewFrame(msg Message) *Frame {
+	id, data := uint32(msg.CANID()), msg.CANData()
 	if len(data) > 8 {
 		data = data[:8]
 	}
@@ -35,6 +39,21 @@ func NewFrame(id uint32, data []byte) *Frame {
 	copy(f.Data[:], data)
 	return f
 }
+
+// Message represents a single CAN message with ID and Data.
+type Message interface {
+	CANID() int
+	CANData() []byte
+}
+
+// Simple is a simple implementation of a Message.
+type Simple struct {
+	ID   int
+	Data []byte
+}
+
+func (s Simple) CANID() int      { return s.ID }
+func (s Simple) CANData() []byte { return s.Data }
 
 // Conn holds a connection to the CAN socket.
 type Conn interface {

@@ -26,12 +26,12 @@ type Frame struct {
 	Data    [8]byte
 }
 
-func (f Frame) CANID() int      { return int(f.ID) }
-func (f Frame) CANData() []byte { return f.Data[:] }
+func (f Frame) GetID() int      { return int(f.ID) }
+func (f Frame) GetData() []byte { return f.Data[:] }
 
 // NewFrame returns a new CAN Frame. Data is truncated after 8 bytes.
 func NewFrame(msg Message) *Frame {
-	id, data := uint32(msg.CANID()), msg.CANData()
+	id, data := uint32(msg.GetID()), msg.GetData()
 	if len(data) > 8 {
 		data = data[:8]
 	}
@@ -42,8 +42,8 @@ func NewFrame(msg Message) *Frame {
 
 // Message represents a single CAN message with ID and Data.
 type Message interface {
-	CANID() int
-	CANData() []byte
+	GetID() int
+	GetData() []byte
 }
 
 // Simple is a simple implementation of a Message.
@@ -52,8 +52,8 @@ type Simple struct {
 	Data []byte
 }
 
-func (s Simple) CANID() int      { return s.ID }
-func (s Simple) CANData() []byte { return s.Data }
+func (s Simple) GetID() int      { return s.ID }
+func (s Simple) GetData() []byte { return s.Data }
 
 // Conn holds a connection to the CAN socket.
 type Conn interface {

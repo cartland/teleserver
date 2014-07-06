@@ -1,8 +1,12 @@
 package msgs
 
 import (
+	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/calsol/teleserver/binpack"
+	"github.com/calsol/teleserver/can"
 )
 
 var idToMessage = map[uint16]CAN{
@@ -63,6 +67,16 @@ func GetID(msg CAN) uint16 {
 		}
 	}
 	return 0
+}
+
+// NewCAN parses a CAN message to turn it into something semantically meaningful.
+func NewCAN(m can.Message) (CAN, error) {
+	id, body := m.GetID(), m.GetData()
+	msg := IDToMessage(uint16(id))
+	if err := binpack.Unmarshal(body, msg); err != nil {
+		return nil, fmt.Errorf("packet 0x%x: payload %v: %v", id, body, err)
+	}
+	return msg, nil
 }
 
 // NewCANPlus is a convenience function to add extra info to a CAN message.

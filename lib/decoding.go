@@ -8,7 +8,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/calsol/teleserver/binpack"
+	"github.com/calsol/canethernet/canusb"
 	"github.com/calsol/teleserver/can"
 	"github.com/calsol/teleserver/msgs"
 	"github.com/stvnrhodes/broadcaster"
@@ -60,7 +60,7 @@ func NewXSPScanner(r io.Reader) *bufio.Scanner {
 	return s
 }
 
-// newCANFromBytes takes the raw bytes of a CAN message and parses it into a
+// newCANFromBytes takes the raw bytes of a XSPCAN message and parses it into a
 // semantically useful message.
 func newCANFromBytes(b []byte) (msgs.CAN, error) {
 	if len(b) < 2 {
@@ -76,12 +76,7 @@ func newCANFromBytes(b []byte) (msgs.CAN, error) {
 	} else if len(body) != length {
 		return nil, fmt.Errorf("packet 0x%x: payload size %d != actual size %d: %v", id, length, len(body), body)
 	}
-
-	msg := msgs.IDToMessage(id)
-	if err := binpack.Unmarshal(body, msg); err != nil {
-		return nil, fmt.Errorf("packet 0x%x: payload %v: %v", id, body, err)
-	}
-	return msg, nil
+	return msgs.NewCAN(can.Simple{ID: int(id), Data: body})
 }
 
 // CANReader is capable of reading CAN messages.
@@ -108,43 +103,27 @@ func (c *xspCANReader) Read() (msgs.CAN, error) {
 	return nil, c.b.Err()
 }
 
-type socketCANReader struct {
-	r io.Reader
+type canUSBReader struct {
+	ch <-chan can.Message
 }
 
-// We fudge the numbers a bit here so that this matches XSPCAN messages. We
-// remove the padding, combine the length with the id, and truncate the data.
-// If we ever deprecate XSPCAN, newCANFromBytes should probably be changed to
-// expect binary encodings of can.Frame.
-func changeSocketCANEncoding(b []byte) ([]byte, error) {
-	id := binary.LittleEndian.Uint32(b[:4])
-	body := b[8:]
-	length := b[4]
-	if int(length) > len(body) {
-		return nil, fmt.Errorf("packet 0x%x: payload size %d is greater than %d: %v", id, len(body), length, body)
-	}
-	ids := make([]byte, 4)
-	binary.LittleEndian.PutUint32(ids, id<<4)
-	ids[0] |= length
-	return append(ids[:2], body[:length]...), nil
+func NewCANUSBReader(c *canusb.Conn) CANReader  { return &canUSBReader{c.ReceiveCh()} }
+func (c *canUSBReader) Read() (msgs.CAN, error) { return msgs.NewCAN(<-c.ch) }
+
+type socketCANReader struct {
+	c can.Conn
 }
 
 // NewSocketCANReader creates a reader that reads from a SocketCAN connection
 // and returns complete messages. The SocketCAN format reads can.FrameSize bytes
 // at a time and interprets them as a complete CAN message.
-func NewSocketCANReader(r io.Reader) CANReader { return socketCANReader{r} }
+func NewSocketCANReader(c can.Conn) CANReader { return socketCANReader{c} }
 func (s socketCANReader) Read() (msgs.CAN, error) {
-	b := make([]byte, can.FrameSize)
-	if n, err := s.r.Read(b); err != nil {
-		return nil, err
-	} else if n != len(b) {
-		return nil, fmt.Errorf("got %d bytes, want %d", n, len(b))
-	}
-	msg, err := changeSocketCANEncoding(b)
+	msg, err := s.c.ReadFrame()
 	if err != nil {
 		return nil, err
 	}
-	return newCANFromBytes(msg)
+	return msgs.NewCAN(msg)
 }
 
 // ReadCAN will continually read bytes from the io.Reader, interpret them as

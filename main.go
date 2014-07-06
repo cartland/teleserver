@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/calsol/canethernet/canusb"
 	"github.com/calsol/teleserver/can"
 	"github.com/calsol/teleserver/embedded"
 	"github.com/calsol/teleserver/lib"
@@ -28,6 +29,8 @@ func main() {
 
 	port := flag.Int("port", 8080, "Port for the webserver")
 	uart := flag.String("serial", "", "Serial port for talking to the car")
+	canUsb := flag.Bool("canusb", false, "Whether to interpret the serial port as a canusb device")
+	freq := flag.Int("freq", 500, "Frequency in KBPS of CAN if using CANUSB")
 	baud := flag.Int("baud", 115200, "Baud rate for the serial port")
 	canAddr := flag.String("can_addr", "", "Port for SocketCAN.")
 	fake := flag.Bool("fake", false, "Generate fake data and ignore serial")
@@ -83,7 +86,17 @@ func main() {
 			log.Fatal(err)
 		}
 		defer p.Close()
-		go lib.ReadCAN(lib.NewXSPCANReader(p), b)
+		var reader lib.CANReader
+		if *canUsb {
+			usb, err := canusb.New(p, *freq)
+			if err != nil {
+				log.Fatal(err)
+			}
+			reader = lib.NewCANUSBReader(usb)
+		} else {
+			reader = lib.NewXSPCANReader(p)
+		}
+		go lib.ReadCAN(reader, b)
 	} else if *canAddr != "" {
 		c, err := can.Dial(*canAddr)
 		if err != nil {

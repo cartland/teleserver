@@ -87,39 +87,31 @@
                 [0x131, 'Voltage0', 'Cell 04'],
                 [0x131, 'Voltage1', 'Cell 05'],
                 [0x131, 'Voltage2', 'Cell 06'],
-                [0x131, 'Voltage3', 'Cell 07'],
-                [0x132, 'Voltage0', 'Cell 08'],
-                [0x132, 'Voltage1', 'Cell 09'],
-                [0x132, 'Voltage2', 'Cell 10'],
-                [0x132, 'Voltage3', 'Cell 11']
+                [0x131, 'Voltage3', 'Cell 07']
             ],
             'battery-cells-graph-mid': [
-                [0x140, 'Voltage0', 'Cell 12'],
-                [0x140, 'Voltage1', 'Cell 13'],
-                [0x140, 'Voltage2', 'Cell 14'],
-                [0x140, 'Voltage3', 'Cell 15'],
-                [0x141, 'Voltage0', 'Cell 16'],
-                [0x141, 'Voltage1', 'Cell 17'],
-                [0x141, 'Voltage2', 'Cell 18'],
-                [0x141, 'Voltage3', 'Cell 19'],
-                [0x142, 'Voltage0', 'Cell 20'],
-                [0x142, 'Voltage1', 'Cell 21'],
-                [0x142, 'Voltage2', 'Cell 22'],
-                [0x142, 'Voltage3', 'Cell 23']
+                [0x140, 'Voltage0', 'Cell 08'],
+                [0x140, 'Voltage1', 'Cell 09'],
+                [0x140, 'Voltage2', 'Cell 10'],
+                [0x140, 'Voltage3', 'Cell 11'],
+                [0x141, 'Voltage0', 'Cell 12'],
+                [0x141, 'Voltage1', 'Cell 13'],
+                [0x141, 'Voltage2', 'Cell 14'],
+                [0x141, 'Voltage3', 'Cell 15'],
+                [0x142, 'Voltage0', 'Cell 16'],
+                [0x142, 'Voltage1', 'Cell 17'],
+                [0x142, 'Voltage2', 'Cell 18'],
+                [0x142, 'Voltage3', 'Cell 19']
             ],
             'battery-cells-graph-high': [
-                [0x150, 'Voltage0', 'Cell 24'],
-                [0x150, 'Voltage1', 'Cell 25'],
-                [0x150, 'Voltage2', 'Cell 26'],
-                [0x150, 'Voltage3', 'Cell 27'],
-                [0x151, 'Voltage0', 'Cell 28'],
-                [0x151, 'Voltage1', 'Cell 29'],
-                [0x151, 'Voltage2', 'Cell 30'],
-                [0x151, 'Voltage3', 'Cell 31'],
-                [0x152, 'Voltage0', 'Cell 32'],
-                [0x152, 'Voltage1', 'Cell 33'],
-                [0x152, 'Voltage2', 'Cell 34'],
-                [0x152, 'Voltage3', 'Cell 35']
+                [0x150, 'Voltage0', 'Cell 20'],
+                [0x150, 'Voltage1', 'Cell 21'],
+                [0x150, 'Voltage2', 'Cell 22'],
+                [0x150, 'Voltage3', 'Cell 23'],
+                [0x151, 'Voltage0', 'Cell 24'],
+                [0x151, 'Voltage1', 'Cell 25'],
+                [0x151, 'Voltage2', 'Cell 26'],
+                [0x151, 'Voltage3', 'Cell 27']
             ]
         },
         '2m');
@@ -156,7 +148,12 @@
                         var id = getIdForMsg(data.canID, key);
 
                         if ($('#' + id).length) {
-                            $('#' + id).text(val.toFixed(1));
+                            // Cheating to scale voltage
+                            if (id.indexOf("Voltage") > -1) {
+                                $('#' + id).text((val / 10000).toFixed(3));
+                            } else {
+                                $('#' + id).text(val.toFixed(1));
+                            }
                         }
                         graphs.update(id, [data.time, val]);
                     }
@@ -175,7 +172,7 @@
             $('.battery-cell-voltage').each(function() {
                 sum += getNum($(this).text());
             });
-            $('#battery-voltage-total').text(sum);
+            $('#battery-voltage-total').text(sum.toFixed(3));
         };
     });
 })(jQuery);

@@ -10,8 +10,14 @@ import (
 )
 
 var idToMessage = map[uint16]CAN{
-	0x042: &BatteryHeartbeat{},
+	0x014: &Temp{},
+	0x040: &BatteryHeartbeat{},
 	0x041: &CutoffHeartbeat{},
+	0x123: &PackVoltage{},
+	0x124: &PackCurrent{},
+	0x125: &PackTemperature{},
+	0x128: &BPSBalancing{},
+	0x129: &BPSState{},
 	0x130: &BatteryModule{ID: 0x130},
 	0x131: &BatteryModule{ID: 0x131},
 	0x132: &BatteryModule{ID: 0x132},
@@ -40,6 +46,10 @@ var idToMessage = map[uint16]CAN{
 	0x613: &MPPTEnable{ID: 0x613, ArrayLocation: "BackLeft"},
 	0x700: &PanelSwitchPos{},
 }
+
+type Temp struct{ I uint32 }
+
+func (Temp) New() CAN { return &Temp{} }
 
 // IDToMessage provides a mapping from message ids to message types.
 func IDToMessage(id uint16) CAN {

@@ -17,6 +17,8 @@
 </div>
 <div>
   <input type="checkbox" id="pause"> Pause
+  <input type="text" id="id-filter"> Filter ID
+  <input type="text" id="message-filter"> Filter Message
 </div>
 
 <table id="debug">
@@ -32,15 +34,15 @@
 <script language="javascript">
 $(function() {
   var paused = false;
-  $('#pause').click(function () {
+  $('#pause').click(function() {
       paused = this.checked;
   });
 
   function createOrUpdate(time, id, message, val) {
     if (!paused) {
-      var uniq = id + "_" + message
-      if (!$("#" + uniq).length) {
-        $("#debug").append(
+      var uniq = id + '_' + message;
+      if (!$('#' + uniq).length) {
+        $('#debug').append(
           '<tr id="' + uniq + '">' +
             '<th class="time"></th>' +
             '<th class="id">' + id.toString(16) + '</th>' +
@@ -48,13 +50,29 @@ $(function() {
             '<th class="value"></th>' +
           '</tr>');
       }
-      $("#" + uniq + ' .time').text(time);
-      $("#" + uniq + ' .value').text(val);
+      $('#' + uniq + ' .time').text(time);
+      $('#' + uniq + ' .value').text(val);
     }
   }
 
+  function filterBy(field) {
+    return function() {
+      var id = $(this).val().toLowerCase();
+      $(field).each(function() {
+        var elem = $(this);
+        if (elem.text().toLowerCase().indexOf(id) < 0) {
+          elem.parent().hide();
+        } else {
+          elem.parent().show();
+        }
+      });
+    };
+  }
+  $('#id-filter').keyup(filterBy('th.id'));
+  $('#message-filter').keyup(filterBy('th.message'));
+
   // Create a websocket connection and do live updates of the data
-  var ws = new WebSocket("ws://" + window.location.host + "/ws");
+  var ws = new WebSocket('ws://' + window.location.host + '/ws');
   ws.onmessage = function(e) {
     var data = JSON.parse(e.data);
 
@@ -65,6 +83,6 @@ $(function() {
         }
       }
     }
-  }
+  };
 });
 </script>

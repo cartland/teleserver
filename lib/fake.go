@@ -21,6 +21,12 @@ func getSpeed() msgs.CANPlus {
 	return msgs.NewCANPlus(&msgs.VelocityMeasurement{VehicleVelocity: v})
 }
 
+func getPackCurrent() msgs.CANPlus {
+	t := time.Since(startTime)
+	v := float32(50 + 20*math.Cos(t.Seconds()))
+	return msgs.NewCANPlus(&msgs.PackCurrent{Current: v})
+}
+
 func getPower() msgs.CANPlus {
 	t := time.Since(startTime)
 	v := float32(100 + 10*math.Sin(t.Seconds()))
@@ -87,6 +93,8 @@ func GenFake(b broadcaster.Caster) {
 		b.Cast(getBattery(0x151))
 		time.Sleep(metricPeriod)
 		b.Cast(getBattery(0x152))
+		time.Sleep(metricPeriod)
+		b.Cast(getPackCurrent())
 		time.Sleep(metricPeriod)
 	}
 }

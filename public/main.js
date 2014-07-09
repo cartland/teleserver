@@ -157,10 +157,12 @@
                     if (data.CAN.hasOwnProperty(key)) {
                         var val = data.CAN[key];
                         var id = getIdForMsg(data.canID, key);
-
                         if ($('#' + id).length) {
-                            // Cheating to scale voltage
-                            if (id.indexOf("Voltage") > -1) {
+                            if (typeof val == "boolean") {
+                                // Cheating to populate switches
+                                $('#' + id).text(val ? 1 : 0);
+                            } else if (id.indexOf("Voltage") > -1) {
+                                // Cheating to scale voltage
                                 $('#' + id).text((val / 10000).toFixed(3));
                             } else {
                                 $('#' + id).text(val.toFixed(1));

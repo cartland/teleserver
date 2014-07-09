@@ -10,14 +10,19 @@ import (
 )
 
 var idToMessage = map[uint16]CAN{
-	0x014: &Temp{},
+	0x030: &BatteryCarShutdown{},
 	0x040: &BatteryHeartbeat{},
 	0x041: &CutoffHeartbeat{},
+	0x042: &MotorHeartbeat{ID: 0x042, Location: "Left"},
+	0x043: &MotorHeartbeat{ID: 0x043, Location: "Right"},
+	0x044: &DashHeartbeat{},
+	0x045: &PowerHubHeartbeat{ID: 0x045, Location: "Bottom"},
+	0x046: &PowerHubHeartbeat{ID: 0x046, Location: "Top"},
 	0x123: &PackVoltage{},
 	0x124: &PackCurrent{},
 	0x125: &PackTemperature{},
-	0x128: &BPSBalancing{},
-	0x129: &BPSState{},
+	0x128: &BMSBalancing{},
+	0x129: &BMSState{},
 	0x130: &BatteryModule{ID: 0x130},
 	0x131: &BatteryModule{ID: 0x131},
 	0x132: &BatteryModule{ID: 0x132},
@@ -32,10 +37,15 @@ var idToMessage = map[uint16]CAN{
 	0x262: &CutoffSPIIn{},
 	0x280: &CANAccelPos{},
 	0x281: &CANBrakePos{},
+	0x310: &MotorRPM{ID: 0x310, Location: "Left"},
+	0x311: &MotorRPM{ID: 0x311, Location: "Right"},
+
+	// Tritium commands, not relevant for Zephyr
 	0x402: &BusMeasurement{},
 	0x403: &VelocityMeasurement{},
 	0x501: &MotorDriveCommand{},
 	0x502: &MotorPowerCommand{},
+
 	0x600: &MPPTStatus{ID: 0x600, ArrayLocation: "FrontRight"},
 	0x601: &MPPTStatus{ID: 0x601, ArrayLocation: "FrontLeft"},
 	0x602: &MPPTStatus{ID: 0x602, ArrayLocation: "BackRight"},
@@ -46,10 +56,6 @@ var idToMessage = map[uint16]CAN{
 	0x613: &MPPTEnable{ID: 0x613, ArrayLocation: "BackLeft"},
 	0x700: &PanelSwitchPos{},
 }
-
-type Temp struct{ I uint32 }
-
-func (Temp) New() CAN { return &Temp{} }
 
 // IDToMessage provides a mapping from message ids to message types.
 func IDToMessage(id uint16) CAN {

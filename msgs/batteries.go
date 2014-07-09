@@ -1,5 +1,11 @@
 package msgs
 
+type BatteryCarShutdown struct {
+	Error uint8
+}
+
+func (BatteryCarShutdown) New() CAN { return &BatteryCarShutdown{} }
+
 type BatteryHeartbeat struct {
 	Time uint16
 }
@@ -35,7 +41,7 @@ type PackTemperature struct {
 
 func (PackTemperature) New() CAN { return &PackTemperature{} }
 
-type BPSBalancing struct {
+type BMSBalancing struct {
 	Cell00 bool `binpack:"0.0"`
 	Cell01 bool `binpack:"0.1"`
 	Cell02 bool `binpack:"0.2"`
@@ -66,10 +72,10 @@ type BPSBalancing struct {
 	Cell27 bool `binpack:"3.3"`
 }
 
-func (BPSBalancing) New() CAN { return &BPSBalancing{} }
+func (BMSBalancing) New() CAN { return &BMSBalancing{} }
 
-type BPSState struct {
+type BMSState struct {
 	State int8
 }
 
-func (BPSState) New() CAN { return &BPSState{} }
+func (BMSState) New() CAN { return &BMSState{} }

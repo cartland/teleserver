@@ -15,6 +15,7 @@
   messages sent over the socket.
 </div>
 <div>
+  <input type="text" id="filter"> Filter
   <input type="checkbox" id="pause"> Pause
 </div>
 
@@ -29,11 +30,25 @@ $(function() {
       paused = this.checked;
   });
 
+  function filter() {
+    var id = $(this).val().toLowerCase();
+    $('#debug').children().each(function() {
+      var elem = $(this);
+      if (elem.text().toLowerCase().indexOf(id) < 0) {
+        elem.hide();
+      } else {
+        elem.show();
+      }
+    });
+  }
+  $('#filter').keyup(filter);
+
+
   // Create a websocket connection and do live updates of the data
   var ws = new WebSocket("ws://" + window.location.host + "/ws");
   ws.onmessage = function(e) {
     if (!paused) {
-      $("#debug").append(e.data + '<br>');
+      $("#debug").append('<p>' + e.data + '</p>');
     }
   }
 });

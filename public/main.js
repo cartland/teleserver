@@ -117,6 +117,10 @@
             ],
             'battery-current-graph': [
                 [0x124, 'Current', 'Battery Current']
+            ],
+            'pedals-graph': [
+                [0x280, 'PedalPosition', 'Accel Pedal'],
+                [0x281, 'PedalPosition', 'Brake Pedal']
             ]
         },
         '2m');

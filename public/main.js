@@ -11,6 +11,8 @@
         solar.hide();
         dash.hide();
         batt.hide();
+        $('.nav li').removeClass('active')
+        $('#' + newTab + '-nav').addClass('active')
         switch (newTab) {
             case 'home':
                 home.show();
@@ -26,7 +28,7 @@
                 break;
         }
     }
-    var tabs = document.querySelector('paper-tabs');
+    var tabs = document.querySelector('.nav a');
 
     if (!window.location.hash) {
         window.location.hash = 'home';
@@ -112,6 +114,9 @@
                 [0x151, 'Voltage1', 'Cell 25'],
                 [0x151, 'Voltage2', 'Cell 26'],
                 [0x151, 'Voltage3', 'Cell 27']
+            ],
+            'battery-current-graph': [
+                [0x124, 'Current', 'Battery Current']
             ]
         },
         '2m');

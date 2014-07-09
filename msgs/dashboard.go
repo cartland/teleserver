@@ -1,13 +1,13 @@
 package msgs
 
 type CANAccelPos struct {
-	PedalPosition int32
+	PedalPosition float32
 }
 
 func (CANAccelPos) New() CAN { return &CANAccelPos{} }
 
 type CANBrakePos struct {
-	PedalPosition int32
+	PedalPosition float32
 }
 
 func (CANBrakePos) New() CAN { return &CANBrakePos{} }

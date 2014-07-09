@@ -1,7 +1,7 @@
 package msgs
 
 type CANAccelPos struct {
-	PedalPosition float32
+	PedalPosition float64
 }
 
 func (CANAccelPos) New() CAN { return &CANAccelPos{} }
@@ -13,7 +13,7 @@ type DashHeartbeat struct {
 func (DashHeartbeat) New() CAN { return &DashHeartbeat{} }
 
 type CANBrakePos struct {
-	PedalPosition float32
+	PedalPosition float64
 }
 
 func (CANBrakePos) New() CAN { return &CANBrakePos{} }

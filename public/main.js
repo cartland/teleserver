@@ -47,10 +47,8 @@
     });
 
     var graphs = new Graphs({
-            'home-graph': [
-                [0x402, 'BusVoltage', 'Voltage'],
-                [0x402, 'BusCurrent', 'Current'],
-                [0x403, 'VehicleVelocity', 'Velocity']
+            'main-page-graph': [
+                [0x124, 'Current', 'Battery Current']
             ],
             'array-current-graph': [
                 [0x600, 'ArrayCurrent', 'Front Right Array Current'],
@@ -121,6 +119,10 @@
             'pedals-graph': [
                 [0x280, 'PedalPosition', 'Accel Pedal'],
                 [0x281, 'PedalPosition', 'Brake Pedal']
+            ],
+            'motors-graph': [
+                [0x042, 'CurrentRPM', 'Left Motor RPM'],
+                [0x043, 'CurrentRPM', 'Right Motor RPM']
             ]
         },
         '2m');
@@ -174,14 +176,14 @@
             $('.array-current-val').each(function() {
                 sum += getNum($(this).text());
             });
-            $('#array-current-total').text(sum);
+            $('.array-current-total').text(sum);
 
             // Update the total voltage of the batteries
             sum = 0;
             $('.battery-cell-voltage').each(function() {
                 sum += getNum($(this).text());
             });
-            $('#battery-voltage-total').text(sum.toFixed(3));
+            $('.battery-voltage-total').text(sum.toFixed(3));
         };
     });
 })(jQuery);

@@ -38,7 +38,7 @@
 
       <div class="sub-container" id="home-container">
         <div class="metric col-md-4">
-          <h2 id="0x402BusVoltage">-</h2>
+          <h2 class="battery-voltage-total">-</h2>
           Battery (V)
         </div>
         <div class="metric col-md-4">
@@ -46,11 +46,11 @@
           Speed (MPH)
         </div>
         <div class="metric col-md-4">
-          <h2 id="0x402BusCurrent">-</h2>
-          Current (A)
+          <h2 class="array-current-total">-</h2>
+          Solar Current (A)
         </div>
         <div class="graph-container col-md-12">
-          <div id="home-graph" class="plot-placeholder"></div>
+          <div id="main-page-graph" class="plot-placeholder"></div>
         </div>
       </div>
 
@@ -60,7 +60,7 @@
         <div class="metric col-md-12">
           <table class="table table-bordered table-condensed">
             <tr>
-            <th>Total Current: <span id="array-current-total">0</span></th>
+              <th>Total Current: <span class="array-current-total">0</span></th>
               <th>Front Right Array (0x600)</th>
               <th>Front Left Array (0x601)</th>
               <th>Back Right Array (0x602)</th>
@@ -117,6 +117,37 @@
         <div class="graph-container col-md-6">
             <div id="pedals-graph" class="plot-placeholder"></div>
         </div>
+        <div class="metric col-md-6">
+        <table>
+          <tr>
+            <th class="rotate"><div><span>HV Switch</span></div></th>
+            <th class="rotate"><div><span>Solar Switch</span></div></th>
+            <th class="rotate"><div><span>Lights Switch</span></div></th>
+            <th class="rotate"><div><span>Extra Switch</span></div></th>
+            <th class="rotate"><div><span>Forward Toggle</span></div></th>
+            <th class="rotate"><div><span>Neutral Toggle</span></div></th>
+            <th class="rotate"><div><span>Reverse Toggle</span></div></th>
+            <th class="rotate"><div><span>Regen Toggle</span></div></th>
+            <th class="rotate"><div><span>Hazards Toggle</span></div></th>
+            <th class="rotate"><div><span>Power/Eco Mode</span></div></th>
+          </tr>
+          <tr>
+            <td id="0x700HVSwitch">-</td>
+            <td id="0x700SolarSwitch">-</td>
+            <td id="0x700LightsSwitch">-</td>
+            <td id="0x700ExtraSwitch">-</td>
+            <td id="0x700ForwardToggle">-</td>
+            <td id="0x700NeutralToggle">-</td>
+            <td id="0x700ReverseToggle">-</td>
+            <td id="0x700RegenToggle">-</td>
+            <td id="0x700HazardsToggle">-</td>
+            <td id="0x700PowerEcoMode">-</td>
+          </tr>
+        </table>
+        </div>
+        <div class="graph-container col-md-12">
+            <div id="motors-graph" class="plot-placeholder"></div>
+        </div>
       </div>
 
 
@@ -126,7 +157,7 @@
         <div class="metric col-md-12">
           <table class="table table-bordered table-condensed table-responsive">
             <tr>
-              <th>Total Voltage: <span id="battery-voltage-total">None</span></th>
+              <th>Total Voltage: <span class="battery-voltage-total">None</span></th>
               <th>Cell 1</th>
               <th>Cell 2</th>
               <th>Cell 3</th>

@@ -32,7 +32,7 @@ func unescape(bs []byte) []byte {
 			return append(fixed, bs...)
 		}
 		fixed = append(fixed, bs[:i]...)
-		if len(bs) < i+1 {
+		if len(bs) <= i+1 {
 			// The last byte was an encoded value. Wrong, but we'll roll with it.
 			return fixed
 		}

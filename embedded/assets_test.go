@@ -47,7 +47,7 @@ func TestUpdatedEmbedded(t *testing.T) {
 		wantURL, gotURL := freshServ.URL+f, embedServ.URL+f
 		if want, got := getHTTP(t, wantURL), getHTTP(t, gotURL); want != got {
 			t.Errorf("Embedded file %v does not match expected: got %v, want %v", f, got, want)
-			t.Errorf(`Try running 'go-bindata -o embedded/assets.go -ignore \\.bower\.json -ignore bower_components/marked -ignore \demos -ignore \core-tests -ignore bower_components/highlightjs -nomemcopy -pkg embedded public/...'`)
+			t.Errorf(`Try running 'go-bindata -o embedded/assets.go -nomemcopy -pkg embedded public/...'`)
 		}
 	}
 }

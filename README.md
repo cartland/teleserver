@@ -11,10 +11,11 @@ Setting `-sqlite` to a filename is needed if you want to read the data later.
 
 ## Installation from source (recommended)
 1. Install the most recent version of go from http://golang.org/doc/install.
-2. In a terminal, create your [$GOPATH](http://golang.org/cmd/go/#hdr-GOPATH_environment_variable) with `mkdir $HOME/go && export GOPATH=$HOME/go`. For Windows, see [this thread](https://groups.google.com/forum/#!topic/golang-nuts/QVPKm7pbhds).
-3. Run `go get -u github.com/calsol/teleserver` to fetch the binary. You will need git to do this.
-4. Run the binary (`$GOPATH/bin/teleserver -fake` on Linux/OSX, `%GOPATH%/bin/teleserver -fake` on Windows). For getting data from the car, use the `-serial` flag with the appropriate port instead of the `-fake` flag.
-5. Navigate to [http://localhost:8080](http://localhost:8080).
+2. Make sure you have [git](http://git-scm.com/). You'll also need gcc (installed by default in OSX and many Linux distros, tested on Windows with [TDM-GCC](http://tdm-gcc.tdragon.net/))
+3. In a terminal or command prompt, create your [$GOPATH](http://golang.org/cmd/go/#hdr-GOPATH_environment_variable) with `export GOPATH=$HOME/go`. For Windows, run `set GOPATH=%USERPROFILE%\go`. It's a good idea to add this as a permanent environmental variable (google this to figure out how).
+4. Run `go get -u -v github.com/calsol/teleserver` to fetch all the code and compile it into a binary. Both the binary and the source code are installed at GOPATH. 
+5. Run the binary (`$GOPATH/bin/teleserver -fake` on Linux/OSX, `%GOPATH%/bin/teleserver -fake` on Windows). For getting data from the car, use the `-serial` flag with the appropriate port instead of the `-fake` flag.
+6. Navigate to [http://localhost:8080](http://localhost:8080).
 
 ### Flags
 * `-port`: Port for the webserver. Default is 8080.

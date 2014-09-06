@@ -21,6 +21,7 @@ Setting `-sqlite` to a filename is needed if you want to read the data later.
 * `-port`: Port for the webserver. Default is 8080.
 * `-serial`: Port for the serial uart connection. Most often something like `/dev/tty.*` for Linux/OSX and something like `COM12` for Windows.
 * `-baud`: Baud rate for the serial port. Default is 115200.
+* `-canusb`: Treat the serial port as a [CANUSB dongle](http://www.can232.com/?page_id=16)
 * `-can_addr`: Port for SocketCAN.
 * `-fake`: Ignore ports, serve fake data.
 * `-sqlite`: Create a sqlite3 database at this location. Default creates a

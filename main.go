@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"path"
 
@@ -67,6 +68,7 @@ func main() {
 	// All data is distributed to all web connections,
 	b := broadcaster.New()
 	r := mux.NewRouter()
+	attachProfiler(r)
 
 	go db.WriteMessages(b)
 
@@ -135,4 +137,11 @@ func main() {
 
 	log.Printf("Starting server on port %[1]d. Open a web browser at http://localhost:%[1]d/. Use ctrl-c to quit.", 8080)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), r))
+}
+
+func attachProfiler(r *mux.Router) {
+	r.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	r.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	r.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index)
 }

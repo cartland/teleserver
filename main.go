@@ -135,7 +135,7 @@ func main() {
 		r.PathPrefix("/").Handler(http.FileServer(http.Dir(root)))
 	}
 
-	log.Printf("Starting server on port %[1]d. Open a web browser at http://localhost:%[1]d/. Use ctrl-c to quit.", 8080)
+	log.Printf("Starting server on port %[1]d. Open a web browser at http://localhost:%[1]d/. Use ctrl-c to quit.", *port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), r))
 }
 
